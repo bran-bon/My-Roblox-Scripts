@@ -1,0 +1,187 @@
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local ESPEnabled = false  -- Variable to track the ESP state
+local debounce = false
+
+local function findCharacterParts(character)
+    local humanoidRootPart = nil
+    local head = nil
+
+    for _, part in pairs(character:GetChildren()) do
+        if part:IsA("BasePart") then
+            if part.Name:lower():find("root") then
+                humanoidRootPart = part
+            elseif part.Name:lower():find("head") then
+                head = part
+            end
+        end
+    end
+
+    return humanoidRootPart, head
+end
+
+local function createESPForCharacter(character, player)
+    local humanoidRootPart, head = findCharacterParts(character)
+    if not humanoidRootPart and not head then
+        print("No valid parts found for", player.Name)
+        return
+    end
+
+    -- Create highlight
+    local highlight = Instance.new("Highlight")
+    highlight.Parent = character
+    highlight.Adornee = character
+    highlight.OutlineColor = Color3.new(1, 0, 0)
+    highlight.FillColor = player.TeamColor.Color
+    highlight.FillTransparency = 0.8
+
+    -- Create BillboardGui for ESP
+    local esp = Instance.new("BillboardGui")
+    esp.Name = "ESP"
+    esp.Adornee = head or humanoidRootPart
+    esp.AlwaysOnTop = true
+    esp.Size = UDim2.new(0, 100, 0, 50)
+    esp.StudsOffset = Vector3.new(0, 3, 0)
+    esp.Parent = head or humanoidRootPart
+    
+    -- Create TextLabel inside BillboardGui
+    local textLabel = Instance.new("TextLabel", esp)
+    textLabel.TextScaled = true
+    textLabel.BackgroundTransparency = 1
+    textLabel.Size = UDim2.new(0.75, 0, 0.75, 0)
+    textLabel.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+    textLabel.TextColor3 = player.TeamColor.Color
+    textLabel.Font = Enum.Font.SourceSansBold
+    textLabel.Text = player.Name
+    textLabel.TextWrapped = true
+
+    -- Function to update the ESP with player name and visibility check
+    local function updateESP()
+        local localPlayer = game.Players.LocalPlayer
+        local camera = workspace.CurrentCamera
+        local lastRaycastTime = 0
+        while character.Parent do
+            if not ESPEnabled then
+                highlight.Enabled = false
+                esp.Enabled = false
+            else
+                highlight.Enabled = true
+                esp.Enabled = true
+                if localPlayer.Character and localPlayer.Character:FindFirstChild(humanoidRootPart.Name) then
+                    local distance = math.round((character[humanoidRootPart.Name].Position - localPlayer.Character[humanoidRootPart.Name].Position).Magnitude)
+                    textLabel.Text = player.Name .. "\n" .. tostring(distance)
+
+                    -- Perform visibility check periodically
+                    if tick() - lastRaycastTime > 0.5 then
+                        local origin = camera.CFrame.Position
+                        local parts = {character[humanoidRootPart.Name], character[head.Name]}
+                        local raycastParams = RaycastParams.new()
+                        raycastParams.FilterDescendantsInstances = {localPlayer.Character}
+                        raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
+                        
+                        local visible = false
+                        
+                        for _, part in ipairs(parts) do
+                            if part then
+                                -- Perform multiple raycasts across the part's surface
+                                for x = -0.5, 0.5, 0.5 do
+                                    for y = -0.5, 0.5, 0.5 do
+                                        for z = -0.5, 0.5, 0.5 do
+                                            local partSize = part.Size
+                                            local partCFrame = part.CFrame
+                                            local point = partCFrame:pointToWorldSpace(Vector3.new(x * partSize.X, y * partSize.Y, z * partSize.Z))
+                                            local direction = (point - origin).Unit * (point - origin).Magnitude
+                                            local raycastResult = workspace:Raycast(origin, direction, raycastParams)
+                                            
+                                            if raycastResult and raycastResult.Instance:IsDescendantOf(character) then
+                                                visible = true
+                                                break
+                                            end
+                                        end
+                                        if visible then break end
+                                    end
+                                    if visible then break end
+                                end
+                                if visible then break end
+                            end
+                        end
+                        
+                        if visible then
+                            highlight.OutlineColor = Color3.new(0, 1, 0)  -- Green if visible
+                        else
+                            highlight.OutlineColor = Color3.new(1, 0, 0)  -- Red if not visible
+                        end
+                        
+                        lastRaycastTime = tick()
+                    end
+                end
+            end
+            task.wait()
+        end
+    end
+
+    -- Run the ESP update function in a separate thread
+    spawn(updateESP)
+end
+
+local function createESP(player)
+    player.CharacterAdded:Connect(function(character)
+        print("Character added for", player.Name)
+        task.wait(3)  -- Wait for the character parts to spawn
+        createESPForCharacter(character, player)
+    end)
+    if player.Character then
+        print("Creating ESP for existing character of", player.Name)
+        createESPForCharacter(player.Character, player)
+    end
+end
+
+-- Apply ESP to all existing players
+for _, otherPlayer in ipairs(game.Players:GetPlayers()) do
+    if otherPlayer ~= game.Players.LocalPlayer then
+        createESP(otherPlayer)
+    end
+end
+
+-- Apply ESP to newly added players
+game.Players.PlayerAdded:Connect(function(newPlayer)
+    if newPlayer ~= game.Players.LocalPlayer then
+        createESP(newPlayer)
+    end
+end)
+
+-- Toggle ESP with the "Z" key
+UserInputService.InputBegan:Connect(function(input, gameProcessedEvent)
+    if not gameProcessedEvent and not debounce then
+        if input.KeyCode == Enum.KeyCode.Z then
+            ESPEnabled = not ESPEnabled
+            print("ESP toggled", ESPEnabled and "on" or "off")
+            debounce = true
+            task.wait(0.2)
+            debounce = false
+        end
+    end
+end)
+
+-- Use RenderStepped to handle ESP updates
+RunService.RenderStepped:Connect(function()
+    if ESPEnabled then
+        for _, player in ipairs(game.Players:GetPlayers()) do
+            if player ~= game.Players.LocalPlayer and player.Character then
+                -- Force update ESP visibility every frame
+                local character = player.Character
+                local humanoidRootPart, head = findCharacterParts(character)
+                if humanoidRootPart or head then
+                    local esp = (humanoidRootPart or head):FindFirstChild("ESP")
+                    if esp then
+                        esp.Enabled = true
+                    end
+                    local highlight = character:FindFirstChildOfClass("Highlight")
+                    if highlight then
+                        highlight.Enabled = true
+                    end
+                end
+            end
+        end
+    end
+end)
