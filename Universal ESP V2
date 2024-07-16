@@ -1,6 +1,6 @@
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
-local ESPEnabled = false  -- Variable to track the ESP state
+local ESPEnabled = true  -- Variable to track the ESP state
 local debounce = false
 
 local function findCharacterParts(character)
@@ -127,7 +127,7 @@ end
 local function createESP(player)
     player.CharacterAdded:Connect(function(character)
         print("Character added for", player.Name)
-        task.wait(3)  -- Wait for the character parts to spawn
+        task.wait(1.5)  -- Wait for the character parts to spawn
         createESPForCharacter(character, player)
     end)
     if player.Character then
