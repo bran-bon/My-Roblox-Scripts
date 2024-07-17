@@ -3,7 +3,7 @@ local fov = 90
 local smoothing = 0.5
 local predictionFactor = 0.08  -- Adjust this factor to improve prediction accuracy
 local highlightEnabled = false  -- Variable to enable or disable target highlighting. Change to False if using an ESP script.
-local lockPart = "Head"  -- Choose what part it locks onto. Ex. HumanoidRootPart or Head
+local lockPart = "HumanoidRootPart"  -- Choose what part it locks onto. Ex. HumanoidRootPart or Head
 
 local Toggle = false  -- Enable or disable toggle mode
 local ToggleKey = Enum.KeyCode.E  -- Choose the key for toggling aimbot lock
@@ -11,6 +11,7 @@ local ToggleKey = Enum.KeyCode.E  -- Choose the key for toggling aimbot lock
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 local StarterGui = game:GetService("StarterGui")
+local Players = game:GetService("Players")
 
 StarterGui:SetCore("SendNotification", {
     Title = "Universal Aimbot";
@@ -37,8 +38,8 @@ local function getClosest(cframe)
     local mag = math.huge
     local screenCenter = workspace.CurrentCamera.ViewportSize / 2
 
-    for i, v in pairs(game.Players:GetPlayers()) do
-        if v.Character and v.Character:FindFirstChild(lockPart) and v.Character:FindFirstChild("Humanoid") and v.Character:FindFirstChild("HumanoidRootPart") and v ~= game.Players.LocalPlayer and (v.Team ~= game.Players.LocalPlayer.Team or (not teamCheck)) then
+    for i, v in pairs(Players:GetPlayers()) do
+        if v.Character and v.Character:FindFirstChild(lockPart) and v.Character:FindFirstChild("Humanoid") and v.Character:FindFirstChild("HumanoidRootPart") and v ~= Players.LocalPlayer and (v.Team ~= Players.LocalPlayer.Team or (not teamCheck)) then
             local screenPoint, onScreen = workspace.CurrentCamera:WorldToViewportPoint(v.Character[lockPart].Position)
             local distanceFromCenter = (Vector2.new(screenPoint.X, screenPoint.Y) - screenCenter).Magnitude
 
@@ -98,7 +99,7 @@ loop = RunService.RenderStepped:Connect(function()
     if aimbotEnabled then
         updateFOVRing()
 
-        local localPlayer = game.Players.LocalPlayer.Character
+        local localPlayer = Players.LocalPlayer.Character
         local cam = workspace.CurrentCamera
         local screenCenter = workspace.CurrentCamera.ViewportSize / 2
 
