@@ -1,16 +1,22 @@
 local teamCheck = false
 local fov = 90
-local smoothing = 0.03
-local predictionFactor = 0.05  -- Adjust this factor to improve prediction accuracy
-local highlightEnabled = true  -- Variable to enable or disable target highlighting. Change to False if using an ESP script.
-local lockPart = "HumanoidRootPart"  -- Choose what part it locks onto. Ex. HumanoidRootPart or Head
+local smoothing = 0.5
+local predictionFactor = 0.08  -- Adjust this factor to improve prediction accuracy
+local highlightEnabled = false  -- Variable to enable or disable target highlighting. Change to False if using an ESP script.
+local lockPart = "Head"  -- Choose what part it locks onto. Ex. HumanoidRootPart or Head
+
+local Toggle = false  -- Enable or disable toggle mode
+local ToggleKey = Enum.KeyCode.E  -- Choose the key for toggling aimbot lock
 
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 local StarterGui = game:GetService("StarterGui")
 
--- Improved handling to get the Players service
-local Players = game:GetService("Players")
+StarterGui:SetCore("SendNotification", {
+    Title = "Universal Aimbot";
+    Text = "made by bran-bon";
+    Duration = 5;
+})
 
 local FOVring = Drawing.new("Circle")
 FOVring.Visible = true
@@ -22,8 +28,8 @@ FOVring.Position = workspace.CurrentCamera.ViewportSize / 2
 
 local currentTarget = nil
 local aimbotEnabled = true
-local lastToggleTime = 0
-local toggleCooldown = 0.3
+local toggleState = false  -- Variable to keep track of toggle state
+local debounce = false  -- Debounce variable
 
 local function getClosest(cframe)
     local ray = Ray.new(cframe.Position, cframe.LookVector).Unit
@@ -31,8 +37,8 @@ local function getClosest(cframe)
     local mag = math.huge
     local screenCenter = workspace.CurrentCamera.ViewportSize / 2
 
-    for i, v in pairs(Players:GetPlayers()) do
-        if v.Character and v.Character:FindFirstChild(lockPart) and v.Character:FindFirstChild("Humanoid") and v.Character:FindFirstChild("HumanoidRootPart") and v ~= Players.LocalPlayer and (v.Team ~= Players.LocalPlayer.Team or (not teamCheck)) then
+    for i, v in pairs(game.Players:GetPlayers()) do
+        if v.Character and v.Character:FindFirstChild(lockPart) and v.Character:FindFirstChild("Humanoid") and v.Character:FindFirstChild("HumanoidRootPart") and v ~= game.Players.LocalPlayer and (v.Team ~= game.Players.LocalPlayer.Team or (not teamCheck)) then
             local screenPoint, onScreen = workspace.CurrentCamera:WorldToViewportPoint(v.Character[lockPart].Position)
             local distanceFromCenter = (Vector2.new(screenPoint.X, screenPoint.Y) - screenCenter).Magnitude
 
@@ -80,36 +86,31 @@ local function predictPosition(target)
     return nil
 end
 
-local loop
+local function handleToggle()
+    if debounce then return end
+    debounce = true
+    toggleState = not toggleState
+    wait(0.3)  -- Debounce time to prevent multiple toggles
+    debounce = false
+end
+
 loop = RunService.RenderStepped:Connect(function()
-    local currentTime = tick()
-    if UserInputService:IsKeyDown(Enum.KeyCode.X) and (currentTime - lastToggleTime) > toggleCooldown then
-        aimbotEnabled = not aimbotEnabled
-        FOVring.Visible = aimbotEnabled
-        lastToggleTime = currentTime  -- Update the last toggle time
-
-        -- Remove highlight from the current target if it exists
-        if currentTarget and highlightEnabled then
-            removeHighlight(currentTarget)
-            currentTarget = nil
-        end
-        
-        -- Send notification
-        StarterGui:SetCore("SendNotification", {
-            Title = "made by bran.bon";
-            Text = "Aimbot Toggled";
-            Duration = 2;
-        })
-    end
-
     if aimbotEnabled then
         updateFOVRing()
 
-        local localPlayer = Players.LocalPlayer and Players.LocalPlayer.Character
+        local localPlayer = game.Players.LocalPlayer.Character
         local cam = workspace.CurrentCamera
         local screenCenter = workspace.CurrentCamera.ViewportSize / 2
 
-        if localPlayer and UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton2) then
+        if Toggle then
+            if UserInputService:IsKeyDown(ToggleKey) then
+                handleToggle()
+            end
+        else
+            toggleState = UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton2)
+        end
+
+        if toggleState then
             if not currentTarget then
                 currentTarget = getClosest(cam.CFrame)
                 highlightTarget(currentTarget)  -- Highlight the new target if enabled
