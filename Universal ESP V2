@@ -1,7 +1,10 @@
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
+
 local ESPEnabled = true  -- Variable to track the ESP state
+local TeamCheck = true   -- Variable to enable or disable team check
+local VisibilityCheckEnabled = false  -- having this feature on may cause some fps drops
 local debounce = false
 
 local function findCharacterParts(character)
@@ -21,12 +24,27 @@ local function findCharacterParts(character)
     return humanoidRootPart, head
 end
 
+local function removeESP(character)
+    if character:FindFirstChildOfClass("Highlight") then
+        character:FindFirstChildOfClass("Highlight"):Destroy()
+    end
+    if character:FindFirstChild("ESP") then
+        character:FindFirstChild("ESP"):Destroy()
+    end
+end
+
 local function createESPForCharacter(character, player)
+    if TeamCheck and player.Team == Players.LocalPlayer.Team then
+        return
+    end
+
     local humanoidRootPart, head = findCharacterParts(character)
     if not humanoidRootPart and not head then
         print("No valid parts found for", player.Name)
         return
     end
+
+    removeESP(character)  -- Remove any existing ESP before creating new ones
 
     -- Create highlight
     local highlight = Instance.new("Highlight")
@@ -72,48 +90,52 @@ local function createESPForCharacter(character, player)
                     local distance = math.round((character[humanoidRootPart.Name].Position - localPlayer.Character[humanoidRootPart.Name].Position).Magnitude)
                     textLabel.Text = player.Name .. "\n" .. tostring(distance)
 
-                    -- Perform visibility check periodically
-                    if tick() - lastRaycastTime > 0.5 then
-                        local origin = camera.CFrame.Position
-                        local parts = {character[humanoidRootPart.Name], character[head.Name]}
-                        local raycastParams = RaycastParams.new()
-                        raycastParams.FilterDescendantsInstances = {localPlayer.Character}
-                        raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
-                        
-                        local visible = false
-                        
-                        for _, part in ipairs(parts) do
-                            if part then
-                                -- Perform multiple raycasts across the part's surface
-                                for x = -0.5, 0.5, 0.5 do
-                                    for y = -0.5, 0.5, 0.5 do
-                                        for z = -0.5, 0.5, 0.5 do
-                                            local partSize = part.Size
-                                            local partCFrame = part.CFrame
-                                            local point = partCFrame:pointToWorldSpace(Vector3.new(x * partSize.X, y * partSize.Y, z * partSize.Z))
-                                            local direction = (point - origin).Unit * (point - origin).Magnitude
-                                            local raycastResult = workspace:Raycast(origin, direction, raycastParams)
-                                            
-                                            if raycastResult and raycastResult.Instance:IsDescendantOf(character) then
-                                                visible = true
-                                                break
+                    if VisibilityCheckEnabled then
+                        -- Perform visibility check periodically
+                        if tick() - lastRaycastTime > 0.5 then
+                            local origin = camera.CFrame.Position
+                            local parts = {character[humanoidRootPart.Name], character[head.Name]}
+                            local raycastParams = RaycastParams.new()
+                            raycastParams.FilterDescendantsInstances = {localPlayer.Character}
+                            raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
+                            
+                            local visible = false
+                            
+                            for _, part in ipairs(parts) do
+                                if part then
+                                    -- Perform multiple raycasts across the part's surface
+                                    for x = -0.5, 0.5, 0.5 do
+                                        for y = -0.5, 0.5, 0.5 do
+                                            for z = -0.5, 0.5, 0.5 do
+                                                local partSize = part.Size
+                                                local partCFrame = part.CFrame
+                                                local point = partCFrame:pointToWorldSpace(Vector3.new(x * partSize.X, y * partSize.Y, z * partSize.Z))
+                                                local direction = (point - origin).Unit * (point - origin).Magnitude
+                                                local raycastResult = workspace:Raycast(origin, direction, raycastParams)
+                                                
+                                                if raycastResult and raycastResult.Instance:IsDescendantOf(character) then
+                                                    visible = true
+                                                    break
+                                                end
                                             end
+                                            if visible then break end
                                         end
                                         if visible then break end
                                     end
                                     if visible then break end
                                 end
-                                if visible then break end
                             end
+                            
+                            if visible then
+                                highlight.OutlineColor = Color3.new(0, 1, 0)  -- Green if visible
+                            else
+                                highlight.OutlineColor = Color3.new(1, 0, 0)  -- Red if not visible
+                            end
+                            
+                            lastRaycastTime = tick()
                         end
-                        
-                        if visible then
-                            highlight.OutlineColor = Color3.new(0, 1, 0)  -- Green if visible
-                        else
-                            highlight.OutlineColor = Color3.new(1, 0, 0)  -- Red if not visible
-                        end
-                        
-                        lastRaycastTime = tick()
+                    else
+                        highlight.OutlineColor = Color3.new(1, 1, 1)  -- White if visibility check is disabled
                     end
                 end
             end
@@ -133,6 +155,7 @@ local function createESP(player)
     end)
     if player.Character then
         print("Creating ESP for existing character of", player.Name)
+        task.wait(1.5)  -- Wait for the character parts to spawn
         createESPForCharacter(player.Character, player)
     end
 end
