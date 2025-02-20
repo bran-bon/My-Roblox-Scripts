@@ -5585,7 +5585,7 @@ function ESP(plr)
 				TextLabel.Position = UDim2.new(0, 0, 0, -50)
 				TextLabel.Size = UDim2.new(0, 100, 0, 100)
 				TextLabel.Font = Enum.Font.SourceSansSemibold
-				TextLabel.TextSize = 20
+				TextLabel.TextSize = 10
 				TextLabel.TextColor3 = Color3.new(1, 1, 1)
 				TextLabel.TextStrokeTransparency = 0
 				TextLabel.TextYAlignment = Enum.TextYAlignment.Bottom
