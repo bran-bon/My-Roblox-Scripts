@@ -215,7 +215,7 @@ Title.BorderSizePixel = 0
 Title.Size = UDim2.new(0, 250, 0, 20)
 Title.Font = Enum.Font.SourceSans
 Title.TextSize = 18
-Title.Text = "16161 Parkside Ln" .. currentVersion
+Title.Text = "16161 Parkside Ln " .. currentVersion
 
 do
 	local emoji = ({
@@ -5591,7 +5591,7 @@ function ESP(plr)
 				TextLabel.Position = UDim2.new(0, 0, 0, -50)
 				TextLabel.Size = UDim2.new(0, 100, 0, 100)
 				TextLabel.Font = Enum.Font.SourceSansSemibold
-				TextLabel.TextSize = 13
+				TextLabel.TextSize = 12
 				TextLabel.TextColor3 = Color3.new(1, 1, 1)
 				TextLabel.TextStrokeTransparency = 0
 				TextLabel.TextYAlignment = Enum.TextYAlignment.Bottom
@@ -5629,7 +5629,7 @@ function ESP(plr)
 					if COREGUI:FindFirstChild(plr.Name..'_ESP') then
 						if plr.Character and getRoot(plr.Character) and plr.Character:FindFirstChildOfClass("Humanoid") and Players.LocalPlayer.Character and getRoot(Players.LocalPlayer.Character) and Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
 							local pos = math.floor((getRoot(Players.LocalPlayer.Character).Position - getRoot(plr.Character).Position).magnitude)
-							TextLabel.Text = ..plr.Name.. | ..round(plr.Character:FindFirstChildOfClass('Humanoid').Health, 1).. | ..pos
+							TextLabel.Text = plr.Name .. " | " .. round(plr.Character:FindFirstChildOfClass("Humanoid").Health, 1) .. " | " .. pos
 						end
 					else
 						teamChange:Disconnect()
@@ -6330,7 +6330,7 @@ local TeleportCheck = false
 Players.LocalPlayer.OnTeleport:Connect(function(State)
 	if KeepInfYield and (not TeleportCheck) and queueteleport then
 		TeleportCheck = true
-		queueteleport("loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))()")
+		queueteleport("loadstring(game:HttpGet('httploadstrings://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))()")
 	end
 end)
 
