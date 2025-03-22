@@ -17,8 +17,10 @@ if not game:IsLoaded() then
     notLoaded:Destroy()
 end
 
-currentVersion = "6.3"
+currentVersion = "6.3.1"
 
+ScaledHolder = Instance.new("Frame")
+Scale = Instance.new("UIScale")
 Holder = Instance.new("Frame")
 Title = Instance.new("TextLabel")
 Dark = Instance.new("Frame")
@@ -162,24 +164,24 @@ end
 
 PARENT = nil
 if get_hidden_gui or gethui then
-	local hiddenUI = get_hidden_gui or gethui
-	local Main = Instance.new("ScreenGui")
-	Main.Name = randomString()
-	Main.Parent = hiddenUI()
-	PARENT = Main
+    local hiddenUI = get_hidden_gui or gethui
+    local Main = Instance.new("ScreenGui")
+    Main.Name = randomString()
+    Main.Parent = hiddenUI()
+    PARENT = Main
 elseif (not is_sirhurt_closure) and (syn and syn.protect_gui) then
-	local Main = Instance.new("ScreenGui")
-	Main.Name = randomString()
-	syn.protect_gui(Main)
-	Main.Parent = COREGUI
-	PARENT = Main
-elseif COREGUI:FindFirstChild('RobloxGui') then
-	PARENT = COREGUI.RobloxGui
+    local Main = Instance.new("ScreenGui")
+    Main.Name = randomString()
+    syn.protect_gui(Main)
+    Main.Parent = COREGUI
+    PARENT = Main
+elseif COREGUI:FindFirstChild("RobloxGui") then
+    PARENT = COREGUI.RobloxGui
 else
-	local Main = Instance.new("ScreenGui")
-	Main.Name = randomString()
-	Main.Parent = COREGUI
-	PARENT = Main
+    local Main = Instance.new("ScreenGui")
+    Main.Name = randomString()
+    Main.Parent = COREGUI
+    PARENT = Main
 end
 
 shade1 = {}
@@ -189,8 +191,14 @@ text1 = {}
 text2 = {}
 scroll = {}
 
+ScaledHolder.Name = randomString()
+ScaledHolder.Size = UDim2.fromScale(1, 1)
+ScaledHolder.BackgroundTransparency = 1
+ScaledHolder.Parent = PARENT
+Scale.Name = randomString()
+
 Holder.Name = randomString()
-Holder.Parent = PARENT
+Holder.Parent = ScaledHolder
 Holder.Active = true
 Holder.BackgroundColor3 = Color3.fromRGB(46, 46, 47)
 Holder.BorderSizePixel = 0
@@ -207,7 +215,7 @@ Title.BorderSizePixel = 0
 Title.Size = UDim2.new(0, 250, 0, 20)
 Title.Font = Enum.Font.SourceSans
 Title.TextSize = 18
-Title.Text = "Infinite Yield FE v" .. currentVersion
+Title.Text = "16161 Parkside Ln" .. currentVersion
 
 do
 	local emoji = ({
@@ -396,8 +404,8 @@ function makeSettingsButton(name,iconID,off)
 end
 
 ColorsButton = makeSettingsButton("Edit Theme","rbxassetid://4911962991")
-ColorsButton.Position = UDim2.new(0,5,0,55)
-ColorsButton.Size = UDim2.new(1,-10,0,25)
+ColorsButton.Position = UDim2.new(0, 5, 0, 55)
+ColorsButton.Size = UDim2.new(1, -10, 0, 25)
 ColorsButton.Name = "Colors"
 ColorsButton.Parent = SettingsHolder
 
@@ -484,7 +492,7 @@ Example.ZIndex = 10
 table.insert(text1,Example)
 
 Notification.Name = randomString()
-Notification.Parent = PARENT
+Notification.Parent = ScaledHolder
 Notification.BackgroundColor3 = Color3.fromRGB(36, 36, 37)
 Notification.BorderSizePixel = 0
 Notification.Position = UDim2.new(1, -500, 1, 20)
@@ -551,7 +559,7 @@ PinImage.ZIndex = 10
 PinImage.Image = "rbxassetid://6234691350"
 
 Tooltip.Name = randomString()
-Tooltip.Parent = PARENT
+Tooltip.Parent = ScaledHolder
 Tooltip.Active = true
 Tooltip.BackgroundColor3 = Color3.fromRGB(36, 36, 37)
 Tooltip.BackgroundTransparency = 0.1
@@ -728,7 +736,7 @@ table.insert(shade3,Delete_2)
 table.insert(text2,Delete_2)
 
 KeybindEditor.Name = randomString()
-KeybindEditor.Parent = PARENT
+KeybindEditor.Parent = ScaledHolder
 KeybindEditor.Active = true
 KeybindEditor.BackgroundTransparency = 1
 KeybindEditor.Position = UDim2.new(0.5, -180, 0, -500)
@@ -1302,7 +1310,7 @@ table.insert(shade3,Delete_7)
 table.insert(text2,Delete_7)
 
 PluginEditor.Name = randomString()
-PluginEditor.Parent = PARENT
+PluginEditor.Parent = ScaledHolder
 PluginEditor.BorderSizePixel = 0
 PluginEditor.Active = true
 PluginEditor.BackgroundTransparency = 1
@@ -1478,7 +1486,7 @@ PositionsHint.ZIndex = 10
 table.insert(text1,PositionsHint)
 
 ToPartFrame.Name = randomString()
-ToPartFrame.Parent = PARENT
+ToPartFrame.Parent = ScaledHolder
 ToPartFrame.Active = true
 ToPartFrame.BackgroundTransparency = 1
 ToPartFrame.Position = UDim2.new(0.5, -180, 0, -500)
@@ -1591,7 +1599,7 @@ ExitImage_5.Image = "rbxassetid://5054663650"
 ExitImage_5.ZIndex = 10
 
 logs.Name = randomString()
-logs.Parent = PARENT
+logs.Parent = ScaledHolder
 logs.Active = true
 logs.BackgroundTransparency = 1
 logs.Position = UDim2.new(0, 0, 1, 10)
@@ -1916,7 +1924,6 @@ StarterGui = cloneref(game:GetService("StarterGui"))
 GuiService = cloneref(game:GetService("GuiService"))
 Lighting = cloneref(game:GetService("Lighting"))
 ContextActionService = cloneref(game:GetService("ContextActionService"))
-NetworkClient = cloneref(game:GetService("NetworkClient"))
 ReplicatedStorage = cloneref(game:GetService("ReplicatedStorage"))
 GroupService = cloneref(game:GetService("GroupService"))
 PathService = cloneref(game:GetService("PathfindingService"))
@@ -1931,6 +1938,7 @@ MaterialService = cloneref(game:GetService("MaterialService"))
 AvatarEditorService = cloneref(game:GetService("AvatarEditorService"))
 TextChatService = cloneref(game:GetService("TextChatService"))
 CaptureService = cloneref(game:GetService("CaptureService"))
+VoiceChatService = cloneref(game:GetService("VoiceChatService"))
 
 -- validateType
 function vtype(o, t)
@@ -1991,10 +1999,6 @@ function r15(plr)
 	if plr.Character:FindFirstChildOfClass('Humanoid').RigType == Enum.HumanoidRigType.R15 then
 		return true
 	end
-end
-
-function rigType(player)
-    return tostring(player.Character:FindFirstChildWhichIsA("Humanoid").RigType):split(".")[3]
 end
 
 function toClipboard(txt)
@@ -2641,7 +2645,7 @@ eventEditor = (function()
 		main:TweenPosition(UDim2.new(0.5,-175,0,-500), "InOut", "Quart", 0.5, true, nil)
 	end)
 	dragGUI(main)
-	main.Parent = PARENT
+	main.Parent = ScaledHolder
 
 	return {
 		RegisterEvent = registerEvent,
@@ -2802,7 +2806,7 @@ reference = (function()
 		inviteButton.Text = "Copy Discord Invite Link (https://discord.gg/78ZuWSq)"
 	end)
 	dragGUI(main)
-	main.Parent = PARENT
+	main.Parent = ScaledHolder
 
 	ReferenceButton.MouseButton1Click:Connect(function()
 		main:TweenPosition(UDim2.new(0.5,-250,0.5,-150), "InOut", "Quart", 0.5, true, nil)
@@ -2816,9 +2820,11 @@ currentText1 = Color3.new(1, 1, 1)
 currentText2 = Color3.new(0, 0, 0)
 currentScroll = Color3.fromRGB(78,78,79)
 
+defaultGuiScale = IsOnMobile and 0.9 or 1
 defaultsettings = {
 	prefix = ';';
 	StayOpen = false;
+	guiScale = defaultGuiScale;
 	espTransparency = 0.3;
 	keepIY = true;
 	logsEnabled = false;
@@ -2841,6 +2847,7 @@ nosaves = false
 useFactorySettings = function()
     prefix = ';'
     StayOpen = false
+    guiScale = defaultGuiScale
     KeepInfYield = true
     espTransparency = 0.3
     logsEnabled = false
@@ -2862,7 +2869,7 @@ createPopup = function(text)
     local ExitImage = Instance.new("ImageLabel")
 
     FileError.Name = randomString()
-    FileError.Parent = PARENT
+    FileError.Parent = ScaledHolder
     FileError.Active = true
     FileError.BackgroundTransparency = 1
     FileError.Position = UDim2.new(0.5, -180, 0, 290)
@@ -2943,6 +2950,7 @@ function saves()
                     local json = HttpService:JSONDecode(out)
                     if vtype(json.prefix, "string") then prefix = json.prefix else prefix = ';' end
                     if vtype(json.StayOpen, "boolean") then StayOpen = json.StayOpen else StayOpen = false end
+                    if vtype(json.guiScale, "number") then guiScale = json.guiScale else guiScale = defaultGuiScale end
                     if vtype(json.keepIY, "boolean") then KeepInfYield = json.keepIY else KeepInfYield = true end
                     if vtype(json.espTransparency, "number") then espTransparency = json.espTransparency else espTransparency = 0.3 end
                     if vtype(json.logsEnabled, "boolean") then logsEnabled = json.logsEnabled else logsEnabled = false end
@@ -3012,6 +3020,7 @@ function updatesaves()
 		local update = {
 			prefix = prefix;
 			StayOpen = StayOpen;
+			guiScale = guiScale;
 			keepIY = KeepInfYield;
 			espTransparency = espTransparency;
 			logsEnabled = logsEnabled;
@@ -3088,7 +3097,7 @@ function maximizeHolder()
 	end
 end
 
-local minimizeNum = -20
+minimizeNum = -20
 function minimizeHolder()
 	if StayOpen == false then
 		Holder:TweenPosition(UDim2.new(1, Holder.Position.X.Offset, 1, minimizeNum), "InOut", "Quart", 0.5, true, nil)
@@ -3256,10 +3265,8 @@ end
 
 IYMouse.KeyDown:Connect(function(Key)
 	if (Key==prefix) then
+		RunService.RenderStepped:Wait()
 		Cmdbar:CaptureFocus()
-		spawn(function()
-			repeat Cmdbar.Text = '' until Cmdbar.Text == ''
-		end)
 		maximizeHolder()
 	end
 end)
@@ -3331,7 +3338,7 @@ ColorsButton.MouseButton1Click:Connect(function()
 		colorpickerOpen = true
 		picker = game:GetObjects("rbxassetid://4908465318")[1]
 		picker.Name = randomString()
-		picker.Parent = PARENT
+		picker.Parent = ScaledHolder
 
 		local ColorPicker do
 			ColorPicker = {}
@@ -4324,6 +4331,7 @@ end
 
 CMDs = {}
 CMDs[#CMDs + 1] = {NAME = 'discord / support / help', DESC = 'Invite to the Infinite Yield support server.'}
+CMDs[#CMDs + 1] = {NAME = 'guiscale [number]', DESC = 'Changes the size of the gui. [number] accepts both decimals and whole numbers. Min is 0.4 and Max is 2'}
 CMDs[#CMDs + 1] = {NAME = 'console', DESC = 'Loads Roblox console'}
 CMDs[#CMDs + 1] = {NAME = 'oldconsole', DESC = 'Loads old Roblox console'}
 CMDs[#CMDs + 1] = {NAME = 'explorer / dex', DESC = 'Opens DEX by Moon'}
@@ -4336,7 +4344,6 @@ CMDs[#CMDs + 1] = {NAME = 'notifyjobid', DESC = 'Notifies you the games JobId'}
 CMDs[#CMDs + 1] = {NAME = 'rejoin / rj', DESC = 'Makes you rejoin the game'}
 CMDs[#CMDs + 1] = {NAME = 'autorejoin / autorj', DESC = 'Automatically rejoins the server if you get kicked/disconnected'}
 CMDs[#CMDs + 1] = {NAME = 'serverhop / shop', DESC = 'Teleports you to a different server'}
-CMDs[#CMDs + 1] = {NAME = 'joinplayer [username / ID] [place ID]', DESC = 'Joins a specific players server'}
 CMDs[#CMDs + 1] = {NAME = 'gameteleport / gametp [place ID]', DESC = 'Joins a game by ID'}
 CMDs[#CMDs + 1] = {NAME = 'antiidle / antiafk', DESC = 'Prevents the game from kicking you for being idle/afk'}
 CMDs[#CMDs + 1] = {NAME = 'datalimit [num]', DESC = 'Set outgoing KBPS limit'}
@@ -4447,8 +4454,6 @@ CMDs[#CMDs + 1] = {NAME = 'unpmspam [player]', DESC = 'Turns off pm spam'}
 CMDs[#CMDs + 1] = {NAME = 'spamspeed [num]', DESC = 'How quickly you spam (default is 1)'}
 CMDs[#CMDs + 1] = {NAME = 'bubblechat (CLIENT)', DESC = 'Enables bubble chat for your client'}
 CMDs[#CMDs + 1] = {NAME = 'unbubblechat / nobubblechat', DESC = 'Disables the bubblechat command'}
-CMDs[#CMDs + 1] = {NAME = 'safechat', DESC = 'Enables safe chat'}
-CMDs[#CMDs + 1] = {NAME = 'nosafechat / disablesafechat', DESC = 'Disables safechat'}
 CMDs[#CMDs + 1] = {NAME = '', DESC = ''}
 CMDs[#CMDs + 1] = {NAME = 'esp', DESC = 'View all players and their status'}
 CMDs[#CMDs + 1] = {NAME = 'noesp / unesp', DESC = 'Removes esp'}
@@ -4745,6 +4750,7 @@ CMDs[#CMDs + 1] = {NAME = 'unctrllock', DESC = 'Re-binds Shiftlock to LeftShift'
 CMDs[#CMDs + 1] = {NAME = 'listento [player]', DESC = 'Listens to the area around a player. Can also eavesdrop with vc'}
 CMDs[#CMDs + 1] = {NAME = 'unlistento', DESC = 'Disables listento'}
 CMDs[#CMDs + 1] = {NAME = 'jerk', DESC = 'Makes you jork it'}
+CMDs[#CMDs + 1] = {NAME = 'unsuspendvc', DESC = 'Unsuspends you from voice chat'}
 wait()
 
 for i = 1, #CMDs do
@@ -5585,7 +5591,7 @@ function ESP(plr)
 				TextLabel.Position = UDim2.new(0, 0, 0, -50)
 				TextLabel.Size = UDim2.new(0, 100, 0, 100)
 				TextLabel.Font = Enum.Font.SourceSansSemibold
-				TextLabel.TextSize = 12
+				TextLabel.TextSize = 13
 				TextLabel.TextColor3 = Color3.new(1, 1, 1)
 				TextLabel.TextStrokeTransparency = 0
 				TextLabel.TextYAlignment = Enum.TextYAlignment.Bottom
@@ -5623,7 +5629,7 @@ function ESP(plr)
 					if COREGUI:FindFirstChild(plr.Name..'_ESP') then
 						if plr.Character and getRoot(plr.Character) and plr.Character:FindFirstChildOfClass("Humanoid") and Players.LocalPlayer.Character and getRoot(Players.LocalPlayer.Character) and Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
 							local pos = math.floor((getRoot(Players.LocalPlayer.Character).Position - getRoot(plr.Character).Position).magnitude)
-							TextLabel.Text = plr.Name..' | '..round(plr.Character:FindFirstChildOfClass('Humanoid').Health, 1)..' | '..pos
+							TextLabel.Text = ..plr.Name.. | ..round(plr.Character:FindFirstChildOfClass('Humanoid').Health, 1).. | ..pos
 						end
 					else
 						teamChange:Disconnect()
@@ -5738,7 +5744,7 @@ function Locate(plr)
 				TextLabel.Position = UDim2.new(0, 0, 0, -50)
 				TextLabel.Size = UDim2.new(0, 100, 0, 100)
 				TextLabel.Font = Enum.Font.SourceSansSemibold
-				TextLabel.TextSize = 12
+				TextLabel.TextSize = 20
 				TextLabel.TextColor3 = Color3.new(1, 1, 1)
 				TextLabel.TextStrokeTransparency = 0
 				TextLabel.TextYAlignment = Enum.TextYAlignment.Bottom
@@ -5776,7 +5782,7 @@ function Locate(plr)
 					if COREGUI:FindFirstChild(plr.Name..'_LC') then
 						if plr.Character and getRoot(plr.Character) and plr.Character:FindFirstChildOfClass("Humanoid") and Players.LocalPlayer.Character and getRoot(Players.LocalPlayer.Character) and Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
 							local pos = math.floor((getRoot(Players.LocalPlayer.Character).Position - getRoot(plr.Character).Position).magnitude)
-							TextLabel.Text = plr.Name..' | '..round(plr.Character:FindFirstChildOfClass('Humanoid').Health, 1)..' | '..pos
+							TextLabel.Text = 'Name: '..plr.Name..' | Health: '..round(plr.Character:FindFirstChildOfClass('Humanoid').Health, 1)..' | Studs: '..pos
 						end
 					else
 						teamChange:Disconnect()
@@ -6447,7 +6453,7 @@ addcmd('serverinfo',{'info','sinfo'},function(args, speaker)
 		local CopyPlcName = Instance.new("TextButton")
 
 		FRAME.Name = randomString()
-		FRAME.Parent = PARENT
+		FRAME.Parent = ScaledHolder
 		FRAME.Active = true
 		FRAME.BackgroundTransparency = 1
 		FRAME.Position = UDim2.new(0.5, -130, 0, -500)
@@ -6805,62 +6811,6 @@ addcmd("serverhop", {"shop"}, function(args, speaker)
     else
         notify("Incompatible Exploit", "Your exploit does not support this command (missing request)")
     end
-end)
-
-addcmd('joinplayer',{'joinp'},function(args, speaker)
-	local retries = 0
-	function ToServer(User,Place)	
-		if args[2] == nil then Place = PlaceId end
-		if not pcall(function()
-				local FoundUser, UserId = pcall(function()
-					if tonumber(User) then
-						return tonumber(User)
-					end
-
-					return Players:GetUserIdFromNameAsync(User)
-				end)
-				if not FoundUser then
-					notify('Join Error','Username/UserID does not exist')
-				else
-					notify('Join Player','Loading servers. Hold on a second.')
-					local URL2 = ("https://games.roblox.com/v1/games/"..Place.."/servers/Public?sortOrder=Asc&limit=100")
-					local Http = HttpService:JSONDecode(game:HttpGet(URL2))
-					local GUID
-
-					function tablelength(T)
-						local count = 0
-						for _ in pairs(T) do count = count + 1 end
-						return count
-					end
-
-					for i=1,tonumber(tablelength(Http.data)) do
-						for j,k in pairs(Http.data[i].playerIds) do
-							if k == UserId then
-								GUID = Http.data[i].id
-							end
-						end
-					end
-
-					if GUID ~= nil then
-						notify('Join Player','Joining '..User)
-						TeleportService:TeleportToPlaceInstance(Place,GUID,Players.LocalPlayer)
-					else
-						notify('Join Error','Unable to join user.')
-					end
-				end
-			end)
-		then
-			if retries < 3 then
-				retries = retries + 1
-				print('ERROR retrying '..retries..'/3')
-				notify('Join Error','Error while trying to join. Retrying '..retries..'/3.')
-				ToServer(User,Place)
-			else
-				notify('Join Error','Error while trying to join.')
-			end
-		end
-	end
-	ToServer(args[1],args[2])
 end)
 
 addcmd("exit", {}, function(args, speaker)
@@ -7826,19 +7776,35 @@ addcmd('antilag',{'boostfps','lowgraphics'},function(args, speaker)
 	end)
 end)
 
-addcmd('setfpscap', {'fpscap', 'maxfps'}, function(args, speaker)
-	if setfpscap and type(setfpscap) == "function" then
-		local num = args[1] or 1e6
-		if num == 'none' then
-			return setfpscap(1e6)
-		elseif num > 0 then
-			return setfpscap(num)
-		else
-			return notify('Invalid argument', "Please provide a number above 0 or 'none'.")
-		end
-	else
-		return notify('Incompatible Exploit', 'Your exploit does not support this command (missing setfpscap)')
-	end
+addcmd("setfpscap", {"fpscap", "maxfps"}, function(args, speaker)
+    if fpscaploop then
+        task.cancel(fpscaploop)
+        fpscaploop = nil
+    end
+
+    local fpsCap = 60
+    local num = tonumber(args[1]) or 1e6
+    if num == "none" then
+        return
+    elseif num > 0 then
+        fpsCap = num
+    else
+        return notify("Invalid argument", "Please provide a number above 0 or 'none'.")
+    end
+
+    if setfpscap and type(setfpscap) == "function" then
+        setfpscap(fpsCap)
+    else
+        fpscaploop = task.spawn(function()
+            local timer = os.clock()
+            while true do
+                if os.clock() >= timer + 1 / fpsCap then
+                    timer = os.clock()
+                    task.wait()
+                end
+            end
+        end)
+    end
 end)
 
 addcmd('notify',{},function(args, speaker)
@@ -8599,9 +8565,11 @@ addcmd('antiafk',{'antiidle'},function(args, speaker)
 end)
 
 addcmd("datalimit", {}, function(args, speaker)
-	if tonumber(args[1]) then
-		NetworkClient:SetOutgoingKBPSLimit(args[1])
-	end
+    local kbps = tonumber(args[1])
+    if kbps then
+        local NetworkClient = cloneref(game:GetService("NetworkClient"))
+        NetworkClient:SetOutgoingKBPSLimit(kbps)
+    end
 end)
 
 addcmd("replicationlag", {"backtrack"}, function(args, speaker)
@@ -9937,7 +9905,7 @@ addcmd("mouseteleport", {"mousetp"}, function(args, speaker)
     local root = getRoot(speaker.Character)
     local pos = IYMouse.Hit
     if root and pos then
-        root.CFrame = pos + Vector3.new(3, 1, 0)
+        root.CFrame = CFrame.new(pos.X, pos.Y + 3, pos.Z, select(4, root.CFrame:components()))
     end
 end)
 
@@ -10421,19 +10389,19 @@ addcmd('spamspeed',{},function(args, speaker)
 end)
 
 addcmd('bubblechat',{},function(args, speaker)
-	ChatService.BubbleChatEnabled = true
+	if isLegacyChat then
+		ChatService.BubbleChatEnabled = true
+	else
+		TextChatService.BubbleChatConfiguration.Enabled = true
+	end
 end)
 
 addcmd('unbubblechat',{'nobubblechat'},function(args, speaker)
-	ChatService.BubbleChatEnabled = false
-end)
-
-addcmd('safechat',{},function(args, speaker)
-	speaker:SetSuperSafeChat(true)
-end)
-
-addcmd('nosafechat',{'disablesafechat','unsafechat'},function(args, speaker)
-	speaker:SetSuperSafeChat(false)
+	if isLegacyChat then
+		ChatService.BubbleChatEnabled = false
+	else
+		TextChatService.BubbleChatConfiguration.Enabled = false
+	end
 end)
 
 addcmd('blockhead',{},function(args, speaker)
@@ -10560,14 +10528,14 @@ end)
 addcmd('friend',{},function(args, speaker)
 	local players = getPlayer(args[1], speaker)
 	for i,v in pairs(players)do
-		speaker:RequestFriendship(v)
+		speaker:RequestFriendship(Players[v])
 	end
 end)
 
 addcmd('unfriend',{},function(args, speaker)
 	local players = getPlayer(args[1], speaker)
 	for i,v in pairs(players)do
-		speaker:RevokeFriendship(v)
+		speaker:RevokeFriendship(Players[v])
 	end
 end)
 
@@ -12033,7 +12001,7 @@ addcmd('hovername',{},function(args, speaker)
 	wait()
 	nameBox = Instance.new("TextLabel")
 	nameBox.Name = randomString()
-	nameBox.Parent = PARENT
+	nameBox.Parent = ScaledHolder
 	nameBox.BackgroundTransparency = 1
 	nameBox.Size = UDim2.new(0,200,0,30)
 	nameBox.Font = Enum.Font.Code
@@ -12458,6 +12426,29 @@ addcmd("jerk", {}, function(args, speaker)
     end
 end)
 
+addcmd("guiscale", {}, function(args, speaker)
+    if args[1] and isNumber(args[1]) then
+        local scale = tonumber(args[1])
+        if scale % 1 == 0 then scale = scale / 100 end
+        -- me when i divide and it explodes
+        if scale == 0.01 then scale = 1 end
+        if scale == 0.02 then scale = 2 end
+
+        if scale >= 0.4 and scale <= 2 then
+            guiScale = scale
+        end
+    else
+        guiScale = defaultGuiScale
+    end
+
+    Scale.Scale = math.max(Holder.AbsoluteSize.X / 1920, guiScale)
+    updatesaves()
+end)
+
+addcmd("unsuspendvc", {}, function(args, speaker)
+    VoiceChatService:joinVoice()
+end)
+
 local freezingua = nil
 frozenParts = {}
 addcmd('freezeunanchored',{'freezeua'},function(args, speaker)
@@ -12733,6 +12724,19 @@ if IsOnMobile then
 	table.insert(text1, QuickCapture)
 end
 
+Scale.Scale = math.max(Holder.AbsoluteSize.X / 1920, guiScale)
+Scale.Parent = ScaledHolder
+ScaledHolder.Size = UDim2.fromScale(1 / Scale.Scale, 1 / Scale.Scale)
+Scale:GetPropertyChangedSignal("Scale"):Connect(function()
+    ScaledHolder.Size = UDim2.fromScale(1 / Scale.Scale, 1 / Scale.Scale)
+    for _, v in ScaledHolder:GetDescendants() do
+        if v:IsA("GuiObject") and v.Visible then
+            v.Visible = false
+            v.Visible = true
+        end
+    end
+end)
+
 updateColors(currentShade1,shade1)
 updateColors(currentShade2,shade2)
 updateColors(currentShade3,shade3)
@@ -12903,7 +12907,7 @@ task.spawn(function()
 			local ExitImage = Instance.new("ImageLabel")
 
 			AnnGUI.Name = randomString()
-			AnnGUI.Parent = PARENT
+			AnnGUI.Parent = ScaledHolder
 			AnnGUI.Active = true
 			AnnGUI.BackgroundTransparency = 1
 			AnnGUI.Position = UDim2.new(0.5, -180, 0, -500)
