@@ -6463,7 +6463,7 @@ local TeleportCheck = false
 Players.LocalPlayer.OnTeleport:Connect(function(State)
 	if KeepInfYield and (not TeleportCheck) and queueteleport then
 		TeleportCheck = true
-		queueteleport("loadstring(game:HttpGet('https://raw.githubusercontent.com/bran-bon/My-Roblox-Scripts/refs/heads/main/edited%20infinite%20yield'))()")
+		queueteleport("loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))()")
 	end
 end)
 
@@ -12191,25 +12191,44 @@ addcmd('unhovername',{'nohovername'},function(args, speaker)
 end)
 
 addcmd('headsize',{},function(args, speaker)
-	local players = getPlayer(args[1], speaker)
-	for i,v in pairs(players) do
-		if Players[v] ~= speaker and Players[v].Character:FindFirstChild('Head') then
-			local sizeArg = tonumber(args[2])
-			local Size = Vector3.new(sizeArg,sizeArg,sizeArg)
-			local Head = Players[v].Character:FindFirstChild('Head')
-			if Head:IsA("BasePart") then
-				Head.CanCollide = false
-				Head.Transparency = 1
-				Face.Transparency = 1
-				if not args[2] or sizeArg == 1 then
-					Head.Size = Vector3.new(2,1,1)
-				else
-					Head.Size = Size
-				end
-			end
-		end
-	end
+    local players = getPlayer(args[1], speaker)
+    for i,v in pairs(players) do
+        local plr = Players[v]
+        if plr ~= speaker and plr.Character and plr.Character:FindFirstChild("Head") then
+            
+            local Head = plr.Character.Head
+            local sizeArg = tonumber(args[2]) or 1
+            local newSize = Vector3.new(sizeArg, sizeArg, sizeArg)
+
+            -- hide the real head
+            Head.Transparency = 1
+            Head.CanCollide = false
+            local face = Head:FindFirstChildOfClass("Decal")
+            if face then face.Transparency = 1 end
+
+            -- remove old fake head if it exists
+            local oldFake = plr.Character:FindFirstChild("FakeHead")
+            if oldFake then oldFake:Destroy() end
+
+            -- create fake head
+            local fake = Instance.new("Part")
+            fake.Name = "FakeHead"
+            fake.Size = newSize
+            fake.Shape = Enum.PartType.Ball
+            fake.Transparency = 0.5
+            fake.CanCollide = true
+            fake.Anchored = false
+            fake.Parent = plr.Character
+
+            -- weld it so it follows the real head
+            local weld = Instance.new("WeldConstraint")
+            weld.Part0 = fake
+            weld.Part1 = Head
+            weld.Parent = fake
+        end
+    end
 end)
+
 
 addcmd('hitbox',{},function(args, speaker)
 	local players = getPlayer(args[1], speaker)
