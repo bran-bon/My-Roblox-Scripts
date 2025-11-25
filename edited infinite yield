@@ -12190,25 +12190,84 @@ addcmd('unhovername',{'nohovername'},function(args, speaker)
 	end
 end)
 
-addcmd('headsize',{},function(args, speaker)
+-- Store fake heads so we can delete them later
+local FakeHeads = {}
+
+addcmd('headsize', {}, function(args, speaker)
+	-- args[1] = target player (or "all")
+	-- args[2] = size number (1 = ON, 0 = OFF)
+	-- speaker = command user
+
 	local players = getPlayer(args[1], speaker)
-	for i,v in pairs(players) do
-		if Players[v] ~= speaker and Players[v].Character:FindFirstChild('Head') then
-			local sizeArg = tonumber(args[2])
-			local Size = Vector3.new(sizeArg,sizeArg,sizeArg)
-			local Head = Players[v].Character:FindFirstChild('Head')
-			if Head:IsA("BasePart") then
-				Head.CanCollide = false
-				Head.Transparency = 0.999999999
-				if not args[2] or sizeArg == 1 then
-					Head.Size = Vector3.new(2,1,1)
-				else
-					Head.Size = Size
+	local sizeArg = tonumber(args[2])
+
+	-- Default to 1 if nothing given
+	if not sizeArg then sizeArg = 1 end
+
+	for _, v in pairs(players) do
+		local plr = Players[v]
+		if plr ~= speaker and plr.Character and plr.Character:FindFirstChild("Head") then
+			local char = plr.Character
+			local head = char:FindFirstChild("Head")
+
+			-- Safety
+			if not head or not head:IsA("BasePart") then continue end
+
+			-----------------------------------------------------------
+			-- 🔥 TURN OFF: size = 0 → remove existing fake head
+			-----------------------------------------------------------
+			if sizeArg == 0 then
+				if FakeHeads[plr] and FakeHeads[plr].Parent then
+					FakeHeads[plr]:Destroy()
+				end
+				FakeHeads[plr] = nil
+				continue
+			end
+
+			-----------------------------------------------------------
+			-- 🔥 TURN ON: size > 0 → create fake head
+			-----------------------------------------------------------
+
+			-- Remove old fake head if exists
+			if FakeHeads[plr] and FakeHeads[plr].Parent then
+				FakeHeads[plr]:Destroy()
+			end
+
+			local fakeHead = head:Clone()
+			fakeHead.Name = "FakeHead"
+
+			-- Set size
+			fakeHead.Size = Vector3.new(sizeArg, sizeArg, sizeArg)
+
+			fakeHead.CanCollide = true
+			fakeHead.Transparency = 0.999
+			fakeHead.Massless = true
+
+			-- Remove decals / faces
+			for _, obj in ipairs(fakeHead:GetChildren()) do
+				if obj:IsA("Decal") or obj:IsA("Texture") then
+					obj:Destroy()
 				end
 			end
+			if fakeHead:FindFirstChild("face") then fakeHead.face:Destroy() end
+			if fakeHead:FindFirstChild("Face") then fakeHead.Face:Destroy() end
+
+			-- Weld to real head
+			local weld = Instance.new("WeldConstraint")
+			weld.Part0 = head
+			weld.Part1 = fakeHead
+			weld.Parent = fakeHead
+
+			-- Parent it
+			fakeHead.Parent = char
+
+			-- Store reference
+			FakeHeads[plr] = fakeHead
 		end
 	end
 end)
+
+
 
 addcmd('hitbox',{},function(args, speaker)
 	local players = getPlayer(args[1], speaker)
