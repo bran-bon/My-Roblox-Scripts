@@ -6459,13 +6459,7 @@ Close_4.MouseButton1Click:Connect(function()
 	PluginsFrame:TweenPosition(UDim2.new(0, 0, 0, 175), "InOut", "Quart", 0.5, true, nil)
 end)
 
-local TeleportCheck = false
-Players.LocalPlayer.OnTeleport:Connect(function(State)
-	if KeepInfYield and (not TeleportCheck) and queueteleport then
-		TeleportCheck = true
-		queueteleport("loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))()")
-	end
-end)
+
 
 addcmd('addalias',{},function(args, speaker)
 	if #args < 2 then return end
@@ -12213,9 +12207,6 @@ addcmd('headsize', {}, function(args, speaker)
 			-- Safety
 			if not head or not head:IsA("BasePart") then continue end
 
-			-----------------------------------------------------------
-			-- 🔥 TURN OFF: size = 0 → remove existing fake head
-			-----------------------------------------------------------
 			if sizeArg == 0 then
 				if FakeHeads[plr] and FakeHeads[plr].Parent then
 					FakeHeads[plr]:Destroy()
@@ -12223,10 +12214,6 @@ addcmd('headsize', {}, function(args, speaker)
 				FakeHeads[plr] = nil
 				continue
 			end
-
-			-----------------------------------------------------------
-			-- 🔥 TURN ON: size > 0 → create fake head
-			-----------------------------------------------------------
 
 			-- Remove old fake head if exists
 			if FakeHeads[plr] and FakeHeads[plr].Parent then
