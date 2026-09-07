@@ -610,6 +610,7 @@ local smoothing = 0.2
 local predictionFactor = 0.12
 local AimPart = "Head"
 local toggleKey = Enum.KeyCode.X
+local guiToggleKey = Enum.KeyCode.RightShift
 local noRecoilEnabled = false
 local rapidFireEnabled = false
 
@@ -1239,6 +1240,11 @@ RunService.RenderStepped:Connect(function()
 end)
 
 UserInputService.InputBegan:Connect(function(input, gameProcessedEvent)
+    if input.KeyCode == guiToggleKey then
+        mainFrame.Visible = not mainFrame.Visible
+        return
+    end
+
     if gameProcessedEvent or not AimbotMasterEnabled then return end
     if input.KeyCode == toggleKey then
         AimbotEnabled = not AimbotEnabled
@@ -1351,7 +1357,7 @@ updateHitChanceUI = createSliderUI(silentContainer, "Hit Chance", 10, 100, 5, Si
     SilentHitChance = val
 end)
 
-local _, setNoRecoil = createToggleUI(modsContainer, "No Recoil (only some guns + fucks ur fps)", noRecoilEnabled, function(val)
+local _, setNoRecoil = createToggleUI(modsContainer, "No Recoil (doesnt work on all guns)", noRecoilEnabled, function(val)
     noRecoilEnabled = val
 end)
 
@@ -1373,6 +1379,10 @@ local _, setRapidFire = createToggleUI(modsContainer, "Rapid Fire", rapidFireEna
         end
         originalFireModes = {}
     end
+end)
+
+createKeybindUI(configContainer, "GUI Toggle Key", guiToggleKey, function(key)
+    guiToggleKey = key
 end)
 
 local HttpService = game:GetService("HttpService")
@@ -1442,6 +1452,7 @@ local function saveCurrentConfig()
         predictionFactor = predictionFactor,
         aimPart = AimPart,
         toggleKey = toggleKey.Name,
+        guiToggleKey = guiToggleKey.Name,
         noRecoil = noRecoilEnabled,
         rapidFire = rapidFireEnabled,
         silentAim = SilentAimEnabled,
@@ -1482,6 +1493,7 @@ local function loadConfigByName(cfgName)
             if data.predictionFactor ~= nil then setPrediction(data.predictionFactor, true) end
             if data.aimPart ~= nil then setAimPart(data.aimPart, true) end
             if data.toggleKey ~= nil and Enum.KeyCode[data.toggleKey] then setToggleKey(Enum.KeyCode[data.toggleKey], true) end
+            if data.guiToggleKey ~= nil and Enum.KeyCode[data.guiToggleKey] then guiToggleKey = Enum.KeyCode[data.guiToggleKey] end
             if data.noRecoil ~= nil then setNoRecoil(data.noRecoil, true) end
             if data.rapidFire ~= nil then setRapidFire(data.rapidFire, true) end
         end
@@ -1500,6 +1512,7 @@ local function resetToDefault()
     setPrediction(0.12, true)
     setAimPart("Head", true)
     setToggleKey(Enum.KeyCode.X, true)
+    guiToggleKey = Enum.KeyCode.RightShift
     setNoRecoil(false, true)
     setRapidFire(false, true)
 end
