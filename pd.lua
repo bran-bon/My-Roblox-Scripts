@@ -307,7 +307,7 @@ local function createSliderUI(parent, name, min, max, step, defaultVal, callback
         currentValue = math.clamp(val, min, max)
         currentValue = math.floor(currentValue / step + 0.5) * step
         fill.Size = UDim2.new((currentValue - min) / (max - min), 0, 1, 0)
-        label.Text = name .. ": " .. string.format("%.2f", currentValue)
+        label.Text = name .. ": " .. string.format(step < 1 and "%.2f" or "%.0f", currentValue)
         if fireCallback then
             callback(currentValue)
         end
@@ -617,6 +617,7 @@ local rapidFireEnabled = false
 local currentTarget = nil
 local TargetLoop = nil
 local originalFireModes = {}
+local originalRecoilValues = {}
 
 local setAimbotMasterUI = nil
 local setSilentAimUI = nil
@@ -727,6 +728,7 @@ local SilentAimEnabled = false
 local TargetNpcs_S = true
 local CircleVisible = true
 local TriggerbotEnabled = false
+local TriggerbotBurstLimit = 0
 
 local SilentFOVRadius = 150
 local SilentHitChance = 100
@@ -750,6 +752,8 @@ SilentCircle.Visible = false
 local activeSilentTargetHead = nil
 local isSilentTargetActive = false
 local isTriggerbotHolding = false
+local triggerbotShotCount = 0
+local lastTriggerbotTime = 0
 
 local function getValidHitParts(char)
     local parts = {}
@@ -863,12 +867,36 @@ RunService.RenderStepped:Connect(function()
 
         if TriggerbotEnabled then
             local visible = isVisible(hitPart, targetChar)
-            if visible then
-                if not isTriggerbotHolding then
-                    pcall(function()
-                        VirtualUser:Button1Down(Vector2.new(0,0))
-                    end)
-                    isTriggerbotHolding = true
+            if visible and SilentAimEnabled and isSilentTargetActive and activeSilentTargetHead then
+                local currentTime = os.clock()
+                local canShoot = true
+                if not rapidFireEnabled then
+                    if currentTime - lastTriggerbotTime < 0.25 then
+                        canShoot = false
+                    end
+                end
+
+                if canShoot then
+                    if TriggerbotBurstLimit > 0 and rapidFireEnabled then
+                        triggerbotShotCount = triggerbotShotCount + 1
+                        if triggerbotShotCount > TriggerbotBurstLimit then
+                            if isTriggerbotHolding then
+                                pcall(function() VirtualUser:Button1Up(Vector2.new(0,0)) end)
+                                isTriggerbotHolding = false
+                            end
+                            canShoot = false
+                        end
+                    end
+
+                    if canShoot then
+                        if not isTriggerbotHolding then
+                            pcall(function()
+                                VirtualUser:Button1Down(Vector2.new(0,0))
+                            end)
+                            isTriggerbotHolding = true
+                            lastTriggerbotTime = currentTime
+                        end
+                    end
                 end
             else
                 if isTriggerbotHolding then
@@ -877,6 +905,7 @@ RunService.RenderStepped:Connect(function()
                     end)
                     isTriggerbotHolding = false
                 end
+                triggerbotShotCount = 0
             end
         end
     else
@@ -888,6 +917,7 @@ RunService.RenderStepped:Connect(function()
             end)
             isTriggerbotHolding = false
         end
+        triggerbotShotCount = 0
     end
 end)
 
@@ -1123,6 +1153,24 @@ local _, setNpcESP = createToggleUI(visualsContainer, "NPC ESP", npcESPEnabled, 
     end
 end)
 
+createButtonUI(visualsContainer, "Remove Visors & Flashbang", function()
+    local noInset = LocalPlayer:FindFirstChild("PlayerGui") and LocalPlayer.PlayerGui:FindFirstChild("NoInsetGui")
+    if noInset then
+        local mainF = noInset:FindFirstChild("MainFrame")
+        if mainF then
+            local effects = mainF:FindFirstChild("ScreenEffects")
+            if effects then
+                local vFolder = effects:FindFirstChild("Visor")
+                if vFolder then vFolder:Destroy() end
+                local mFolder = effects:FindFirstChild("Mask")
+                if mFolder then mFolder:Destroy() end
+                local fFolder = effects:FindFirstChild("Flashbang")
+                if fFolder then fFolder:Destroy() end
+            end
+        end
+    end
+end)
+
 createButtonUI(visualsContainer, "Enable Third Person", function()
     LocalPlayer.CameraMode = Enum.CameraMode.Classic
     LocalPlayer.CameraMaxZoomDistance = 400
@@ -1172,7 +1220,7 @@ end)
 
 task.spawn(function()
     while true do
-        task.wait(0.2)
+        task.wait(0.25)
         if rapidFireEnabled then
             local itemsList = ReplicatedStorage:FindFirstChild("ItemsList")
             if itemsList then
@@ -1209,28 +1257,6 @@ task.spawn(function()
                             end
                             settings.FireRate = 0
                             settings.CycleTiming = {0, 0}
-                        end
-                    end
-                end
-            end
-        end
-    end
-end)
-
-RunService.RenderStepped:Connect(function()
-    if noRecoilEnabled then
-        local rangedWeapons = ReplicatedStorage:FindFirstChild("RangedWeapons")
-        if rangedWeapons then
-            for _, weapon in ipairs(rangedWeapons:GetChildren()) do
-                for _, child in ipairs(weapon:GetChildren()) do
-                    if child.Name:find("RecoilPattern") then
-                        for _, boolVal in ipairs(child:GetChildren()) do
-                            if boolVal:IsA("BoolValue") then
-                                local x = boolVal:FindFirstChild("x")
-                                local y = boolVal:FindFirstChild("y")
-                                if x and x:IsA("NumberValue") then x.Value = 0 end
-                                if y and y:IsA("NumberValue") then y.Value = 0 end
-                            end
                         end
                     end
                 end
@@ -1333,6 +1359,10 @@ createToggleUI(silentContainer, "Triggerbot", TriggerbotEnabled, function(val)
     end
 end)
 
+createSliderUI(silentContainer, "Burst Limit", 0, 15, 1, TriggerbotBurstLimit, function(val)
+    TriggerbotBurstLimit = val
+end)
+
 createToggleUI(silentContainer, "Target NPCs", TargetNpcs_S, function(val)
     TargetNpcs_S = val
 end)
@@ -1349,16 +1379,35 @@ createToggleUI(silentContainer, "Target LowerTorso", TargetLowerTorso_S, functio
     TargetLowerTorso_S = val
 end)
 
-updateFOVRadiusUI = createSliderUI(silentContainer, "FOV Radius", 20, 400, 5, SilentFOVRadius, function(val)
+createSliderUI(silentContainer, "FOV Radius", 20, 400, 5, SilentFOVRadius, function(val)
     SilentFOVRadius = val
 end)
 
-updateHitChanceUI = createSliderUI(silentContainer, "Hit Chance", 10, 100, 5, SilentHitChance, function(val)
+createSliderUI(silentContainer, "Hit Chance", 10, 100, 5, SilentHitChance, function(val)
     SilentHitChance = val
 end)
 
-local _, setNoRecoil = createToggleUI(modsContainer, "No Recoil (doesnt work on all guns)", noRecoilEnabled, function(val)
+local _, setNoRecoil = createToggleUI(modsContainer, "No Recoil", noRecoilEnabled, function(val)
     noRecoilEnabled = val
+    local rangedWeapons = ReplicatedStorage:FindFirstChild("RangedWeapons")
+    if not rangedWeapons then return end
+
+    if val then
+        originalRecoilValues = {}
+        for _, desc in ipairs(rangedWeapons:GetDescendants()) do
+            if desc:IsA("NumberValue") and (desc.Name == "x" or desc.Name == "y") then
+                originalRecoilValues[desc] = desc.Value
+                desc.Value = 0
+            end
+        end
+    else
+        for desc, origVal in pairs(originalRecoilValues) do
+            if desc and desc.Parent then
+                desc.Value = origVal
+            end
+        end
+        originalRecoilValues = {}
+    end
 end)
 
 local _, setRapidFire = createToggleUI(modsContainer, "Rapid Fire", rapidFireEnabled, function(val)
@@ -1458,6 +1507,7 @@ local function saveCurrentConfig()
         silentAim = SilentAimEnabled,
         circleVisible = CircleVisible,
         triggerbot = TriggerbotEnabled,
+        burstLimit = TriggerbotBurstLimit,
         silentFOV = SilentFOVRadius,
         silentHitChance = SilentHitChance
     }
