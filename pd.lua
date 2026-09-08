@@ -613,6 +613,7 @@ local toggleKey = Enum.KeyCode.X
 local guiToggleKey = Enum.KeyCode.RightShift
 local noRecoilEnabled = false
 local rapidFireEnabled = false
+local noBulletDropEnabled = false
 
 local currentTarget = nil
 local TargetLoop = nil
@@ -1271,16 +1272,12 @@ UserInputService.InputBegan:Connect(function(input, gameProcessedEvent)
         return
     end
 
-    if gameProcessedEvent or not AimbotMasterEnabled then return end
+    if gameProcessedEvent then return end
+    
     if input.KeyCode == toggleKey then
+        if not AimbotMasterEnabled or SilentAimEnabled then return end
         AimbotEnabled = not AimbotEnabled
         if AimbotEnabled then
-            if SilentAimEnabled then
-                SilentAimEnabled = false
-                if setSilentAimUI then
-                    setSilentAimUI(false, false)
-                end
-            end
             ResetTarget()
             AimbotLoop()
         else
@@ -1430,6 +1427,33 @@ local _, setRapidFire = createToggleUI(modsContainer, "Rapid Fire", rapidFireEna
     end
 end)
 
+local originalAmmoDropValues = {}
+
+local _, setNoBulletDrop = createToggleUI(modsContainer, "No Bullet Drop", noBulletDropEnabled, function(val)
+    noBulletDropEnabled = val
+    local ammoTypes = ReplicatedStorage:FindFirstChild("AmmoTypes")
+    if not ammoTypes then return end
+
+    if val then
+        originalAmmoDropValues = {}
+        for _, ammo in ipairs(ammoTypes:GetChildren()) do
+            if ammo:IsA("Instance") then
+                originalAmmoDropValues[ammo] = ammo:GetAttribute("ProjectileDrop")
+                if ammo:GetAttribute("ProjectileDrop") ~= nil then
+                    ammo:SetAttribute("ProjectileDrop", 0)
+                end
+            end
+        end
+    else
+        for ammo, origDrop in pairs(originalAmmoDropValues) do
+            if ammo and ammo.Parent and origDrop ~= nil then
+                ammo:SetAttribute("ProjectileDrop", origDrop)
+            end
+        end
+        originalAmmoDropValues = {}
+    end
+end)
+
 createKeybindUI(configContainer, "GUI Toggle Key", guiToggleKey, function(key)
     guiToggleKey = key
 end)
@@ -1504,6 +1528,7 @@ local function saveCurrentConfig()
         guiToggleKey = guiToggleKey.Name,
         noRecoil = noRecoilEnabled,
         rapidFire = rapidFireEnabled,
+        noBulletDrop = noBulletDropEnabled,
         silentAim = SilentAimEnabled,
         circleVisible = CircleVisible,
         triggerbot = TriggerbotEnabled,
@@ -1546,6 +1571,7 @@ local function loadConfigByName(cfgName)
             if data.guiToggleKey ~= nil and Enum.KeyCode[data.guiToggleKey] then guiToggleKey = Enum.KeyCode[data.guiToggleKey] end
             if data.noRecoil ~= nil then setNoRecoil(data.noRecoil, true) end
             if data.rapidFire ~= nil then setRapidFire(data.rapidFire, true) end
+            if data.noBulletDrop ~= nil then setNoBulletDrop(data.noBulletDrop, true) end
         end
     end
 end
@@ -1565,6 +1591,7 @@ local function resetToDefault()
     guiToggleKey = Enum.KeyCode.RightShift
     setNoRecoil(false, true)
     setRapidFire(false, true)
+    setNoBulletDrop(false, true)
 end
 
 local saveBtn = Instance.new("TextButton")
