@@ -17,23 +17,41 @@ end)
 UserInputService.MouseBehavior = Enum.MouseBehavior.Default
 GuiService.AutoSelectGuiEnabled = false
 
+local MAIN_FONT = Enum.Font.GothamMedium
+
+local function applyCorner(parent, radius)
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, radius or 6)
+    corner.Parent = parent
+    return corner
+end
+
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "furhub"
 screenGui.ResetOnSpawn = false
 screenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
 
 local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0, 360, 0, 420)
+mainFrame.Size = UDim2.new(0, 360, 0, 430)
 mainFrame.Position = UDim2.new(0, 50, 0, 150)
-mainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+mainFrame.BackgroundColor3 = Color3.fromRGB(22, 22, 22)
 mainFrame.BorderSizePixel = 0
 mainFrame.Parent = screenGui
+applyCorner(mainFrame, 8)
 
 local topBar = Instance.new("Frame")
-topBar.Size = UDim2.new(1, 0, 0, 35)
-topBar.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+topBar.Size = UDim2.new(1, 0, 0, 36)
+topBar.BackgroundColor3 = Color3.fromRGB(32, 32, 32)
 topBar.BorderSizePixel = 0
 topBar.Parent = mainFrame
+applyCorner(topBar, 8)
+
+local topBarCover = Instance.new("Frame")
+topBarCover.Size = UDim2.new(1, 0, 0, 10)
+topBarCover.Position = UDim2.new(0, 0, 1, -10)
+topBarCover.BackgroundColor3 = Color3.fromRGB(32, 32, 32)
+topBarCover.BorderSizePixel = 0
+topBarCover.Parent = topBar
 
 local dragging, dragInput, dragStart, startPos
 topBar.InputBegan:Connect(function(input)
@@ -63,52 +81,53 @@ UserInputService.InputChanged:Connect(function(input)
 end)
 
 local titleLabel = Instance.new("TextLabel")
-titleLabel.Size = UDim2.new(0, 80, 1, 0)
-titleLabel.Position = UDim2.new(0, 8, 0, 0)
+titleLabel.Size = UDim2.new(0, 90, 1, 0)
+titleLabel.Position = UDim2.new(0, 10, 0, 0)
 titleLabel.BackgroundTransparency = 1
-titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-titleLabel.TextSize = 13
-titleLabel.Font = Enum.Font.SourceSansBold
-titleLabel.Text = "Fur Hub"
+titleLabel.TextColor3 = Color3.fromRGB(240, 240, 240)
+titleLabel.TextSize = 14
+titleLabel.Font = MAIN_FONT
+titleLabel.Text = "FUR HUB"
 titleLabel.TextXAlignment = Enum.TextXAlignment.Left
 titleLabel.Parent = topBar
 
 local tabContainer = Instance.new("Frame")
-tabContainer.Size = UDim2.new(1, -90, 1, 0)
-tabContainer.Position = UDim2.new(0, 85, 0, 0)
+tabContainer.Size = UDim2.new(1, -100, 1, 0)
+tabContainer.Position = UDim2.new(0, 95, 0, 0)
 tabContainer.BackgroundTransparency = 1
 tabContainer.Parent = topBar
 
 local tabLayout = Instance.new("UIListLayout")
 tabLayout.FillDirection = Enum.FillDirection.Horizontal
 tabLayout.SortOrder = Enum.SortOrder.LayoutOrder
-tabLayout.Padding = UDim.new(0, 2)
+tabLayout.Padding = UDim.new(0, 4)
 tabLayout.VerticalAlignment = Enum.VerticalAlignment.Center
 tabLayout.Parent = tabContainer
 
 local function createTabButton(name)
     local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(0, 48, 0, 25)
-    btn.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-    btn.TextColor3 = Color3.fromRGB(180, 180, 180)
-    btn.TextSize = 10
-    btn.Font = Enum.Font.SourceSansBold
-    btn.Text = name
+    btn.Size = UDim2.new(0, 46, 0, 24)
+    btn.BackgroundColor3 = Color3.fromRGB(42, 42, 42)
+    btn.TextColor3 = Color3.fromRGB(160, 160, 160)
+    btn.TextSize = 12
+    btn.Font = MAIN_FONT
+    btn.Text = string.upper(name)
     btn.Parent = tabContainer
+    applyCorner(btn, 4)
 
     local container = Instance.new("ScrollingFrame")
-    container.Size = UDim2.new(1, -10, 1, -45)
-    container.Position = UDim2.new(0, 5, 0, 40)
+    container.Size = UDim2.new(1, -12, 1, -48)
+    container.Position = UDim2.new(0, 6, 0, 42)
     container.BackgroundTransparency = 1
     container.CanvasSize = UDim2.new(0, 0, 0, 0)
     container.AutomaticCanvasSize = Enum.AutomaticSize.Y
-    container.ScrollBarThickness = 4
+    container.ScrollBarThickness = 3
     container.Visible = false
     container.Parent = mainFrame
 
     local listLayout = Instance.new("UIListLayout")
     listLayout.SortOrder = Enum.SortOrder.LayoutOrder
-    listLayout.Padding = UDim.new(0, 4)
+    listLayout.Padding = UDim.new(0, 5)
     listLayout.Parent = container
 
     btn.MouseButton1Click:Connect(function()
@@ -119,11 +138,11 @@ local function createTabButton(name)
         end
         for _, b in ipairs(tabContainer:GetChildren()) do
             if b:IsA("TextButton") then
-                b.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-                b.TextColor3 = Color3.fromRGB(180, 180, 180)
+                b.BackgroundColor3 = Color3.fromRGB(42, 42, 42)
+                b.TextColor3 = Color3.fromRGB(160, 160, 160)
             end
         end
-        btn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+        btn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
         btn.TextColor3 = Color3.fromRGB(255, 255, 255)
         container.Visible = true
     end)
@@ -139,27 +158,28 @@ local modsContainer = createTabButton("Mods")
 local configContainer = createTabButton("Config")
 
 for _, b in ipairs(tabContainer:GetChildren()) do
-    if b:IsA("TextButton") and b.Text == "Visuals" then
-        b.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    if b:IsA("TextButton") and b.Text == "VISUALS" then
+        b.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
         b.TextColor3 = Color3.fromRGB(255, 255, 255)
     end
 end
 
 local function createToggleUI(parent, name, defaultState, callback)
     local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(1, -10, 0, 28)
-    btn.BackgroundColor3 = defaultState and Color3.fromRGB(0, 120, 0) or Color3.fromRGB(120, 0, 0)
-    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    btn.Size = UDim2.new(1, -8, 0, 28)
+    btn.BackgroundColor3 = defaultState and Color3.fromRGB(35, 110, 50) or Color3.fromRGB(110, 35, 35)
+    btn.TextColor3 = Color3.fromRGB(240, 240, 240)
     btn.TextSize = 12
-    btn.Font = Enum.Font.SourceSansBold
-    btn.Text = name .. ": " .. (defaultState and "ON" or "OFF")
+    btn.Font = MAIN_FONT
+    btn.Text = string.upper(name) .. ": " .. (defaultState and "ON" or "OFF")
     btn.Parent = parent
+    applyCorner(btn, 4)
 
     local state = defaultState
     local updateState = function(newState, fireCallback)
         state = newState
-        btn.Text = name .. ": " .. (state and "ON" or "OFF")
-        btn.BackgroundColor3 = state and Color3.fromRGB(0, 120, 0) or Color3.fromRGB(120, 0, 0)
+        btn.Text = string.upper(name) .. ": " .. (state and "ON" or "OFF")
+        btn.BackgroundColor3 = state and Color3.fromRGB(35, 110, 50) or Color3.fromRGB(110, 35, 35)
         if fireCallback then
             callback(state)
         end
@@ -174,13 +194,14 @@ end
 
 local function createButtonUI(parent, name, callback)
     local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(1, -10, 0, 28)
-    btn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    btn.Size = UDim2.new(1, -8, 0, 28)
+    btn.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+    btn.TextColor3 = Color3.fromRGB(240, 240, 240)
     btn.TextSize = 12
-    btn.Font = Enum.Font.SourceSansBold
-    btn.Text = name
+    btn.Font = MAIN_FONT
+    btn.Text = string.upper(name)
     btn.Parent = parent
+    applyCorner(btn, 4)
 
     btn.MouseButton1Click:Connect(function()
         callback()
@@ -192,37 +213,39 @@ end
 local function createDropdownUI(parent, name, options, initialVal, callback)
     local isOpen = false
     local container = Instance.new("Frame")
-    container.Size = UDim2.new(1, -10, 0, 28)
+    container.Size = UDim2.new(1, -8, 0, 28)
     container.BackgroundTransparency = 1
     container.Parent = parent
 
     local mainBtn = Instance.new("TextButton")
     mainBtn.Size = UDim2.new(1, 0, 0, 28)
-    mainBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-    mainBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    mainBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+    mainBtn.TextColor3 = Color3.fromRGB(240, 240, 240)
     mainBtn.TextSize = 12
-    mainBtn.Font = Enum.Font.SourceSansBold
-    mainBtn.Text = name .. ": " .. tostring(initialVal)
+    mainBtn.Font = MAIN_FONT
+    mainBtn.Text = string.upper(name) .. ": " .. tostring(initialVal)
     mainBtn.Parent = container
+    applyCorner(mainBtn, 4)
 
     local listFrame = Instance.new("Frame")
     listFrame.Size = UDim2.new(1, 0, 0, 0)
     listFrame.Position = UDim2.new(0, 0, 0, 30)
-    listFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+    listFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
     listFrame.BorderSizePixel = 0
     listFrame.Visible = false
     listFrame.ZIndex = 5
     listFrame.Parent = container
+    applyCorner(listFrame, 4)
 
     local listLayout = Instance.new("UIListLayout")
     listLayout.SortOrder = Enum.SortOrder.LayoutOrder
     listLayout.Parent = listFrame
 
     local selectOpt = function(opt, fireCallback)
-        mainBtn.Text = name .. ": " .. opt
+        mainBtn.Text = string.upper(name) .. ": " .. opt
         isOpen = false
         listFrame.Visible = false
-        container.Size = UDim2.new(1, -10, 0, 28)
+        container.Size = UDim2.new(1, -8, 0, 28)
         if fireCallback then
             callback(opt)
         end
@@ -238,10 +261,10 @@ local function createDropdownUI(parent, name, options, initialVal, callback)
         for _, opt in ipairs(newOptions) do
             local optBtn = Instance.new("TextButton")
             optBtn.Size = UDim2.new(1, 0, 0, 25)
-            optBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+            optBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
             optBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
             optBtn.TextSize = 11
-            optBtn.Font = Enum.Font.SourceSansBold
+            optBtn.Font = MAIN_FONT
             optBtn.Text = opt
             optBtn.ZIndex = 6
             optBtn.Parent = listFrame
@@ -260,9 +283,9 @@ local function createDropdownUI(parent, name, options, initialVal, callback)
         isOpen = not isOpen
         listFrame.Visible = isOpen
         if isOpen then
-            container.Size = UDim2.new(1, -10, 0, 28 + listFrame.AbsoluteSize.Y)
+            container.Size = UDim2.new(1, -8, 0, 28 + listFrame.AbsoluteSize.Y)
         else
-            container.Size = UDim2.new(1, -10, 0, 28)
+            container.Size = UDim2.new(1, -8, 0, 28)
         end
     end)
 
@@ -271,34 +294,37 @@ end
 
 local function createSliderUI(parent, name, min, max, step, defaultVal, callback)
     local container = Instance.new("Frame")
-    container.Size = UDim2.new(1, -10, 0, 42)
-    container.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+    container.Size = UDim2.new(1, -8, 0, 42)
+    container.BackgroundColor3 = Color3.fromRGB(32, 32, 32)
     container.BorderSizePixel = 0
     container.Parent = parent
+    applyCorner(container, 4)
 
     local label = Instance.new("TextLabel")
     label.Size = UDim2.new(1, 0, 0, 20)
-    label.Position = UDim2.new(0, 5, 0, 0)
+    label.Position = UDim2.new(0, 6, 0, 0)
     label.BackgroundTransparency = 1
-    label.TextColor3 = Color3.fromRGB(255, 255, 255)
+    label.TextColor3 = Color3.fromRGB(240, 240, 240)
     label.TextSize = 11
-    label.Font = Enum.Font.SourceSansBold
+    label.Font = MAIN_FONT
     label.TextXAlignment = Enum.TextXAlignment.Left
-    label.Text = name .. ": " .. tostring(defaultVal)
+    label.Text = string.upper(name) .. ": " .. tostring(defaultVal)
     label.Parent = container
 
     local sliderBar = Instance.new("Frame")
-    sliderBar.Size = UDim2.new(1, -10, 0, 10)
-    sliderBar.Position = UDim2.new(0, 5, 0, 24)
+    sliderBar.Size = UDim2.new(1, -12, 0, 8)
+    sliderBar.Position = UDim2.new(0, 6, 0, 25)
     sliderBar.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
     sliderBar.BorderSizePixel = 0
     sliderBar.Parent = container
+    applyCorner(sliderBar, 3)
 
     local fill = Instance.new("Frame")
     fill.Size = UDim2.new((defaultVal - min) / (max - min), 0, 1, 0)
-    fill.BackgroundColor3 = Color3.fromRGB(0, 120, 0)
+    fill.BackgroundColor3 = Color3.fromRGB(35, 110, 50)
     fill.BorderSizePixel = 0
     fill.Parent = sliderBar
+    applyCorner(fill, 3)
 
     local currentValue = defaultVal
     local draggingSlider = false
@@ -307,7 +333,7 @@ local function createSliderUI(parent, name, min, max, step, defaultVal, callback
         currentValue = math.clamp(val, min, max)
         currentValue = math.floor(currentValue / step + 0.5) * step
         fill.Size = UDim2.new((currentValue - min) / (max - min), 0, 1, 0)
-        label.Text = name .. ": " .. string.format(step < 1 and "%.2f" or "%.0f", currentValue)
+        label.Text = string.upper(name) .. ": " .. string.format(step < 1 and "%.2f" or "%.0f", currentValue)
         if fireCallback then
             callback(currentValue)
         end
@@ -343,20 +369,21 @@ end
 
 local function createKeybindUI(parent, name, defaultKey, callback)
     local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(1, -10, 0, 28)
-    btn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    btn.Size = UDim2.new(1, -8, 0, 28)
+    btn.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+    btn.TextColor3 = Color3.fromRGB(240, 240, 240)
     btn.TextSize = 12
-    btn.Font = Enum.Font.SourceSansBold
-    btn.Text = name .. ": [" .. defaultKey.Name .. "]"
+    btn.Font = MAIN_FONT
+    btn.Text = string.upper(name) .. ": [" .. defaultKey.Name .. "]"
     btn.Parent = parent
+    applyCorner(btn, 4)
 
     local currentKey = defaultKey
     local binding = false
 
     local updateKey = function(newKey, fireCallback)
         currentKey = newKey
-        btn.Text = name .. ": [" .. currentKey.Name .. "]"
+        btn.Text = string.upper(name) .. ": [" .. currentKey.Name .. "]"
         if fireCallback then
             callback(currentKey)
         end
@@ -365,7 +392,7 @@ local function createKeybindUI(parent, name, defaultKey, callback)
     btn.MouseButton1Click:Connect(function()
         if binding then return end
         binding = true
-        btn.Text = name .. ": [Press Key...]"
+        btn.Text = string.upper(name) .. ": [PRESS KEY...]"
         
         local connection
         connection = UserInputService.InputBegan:Connect(function(input, gameProcessed)
@@ -379,6 +406,424 @@ local function createKeybindUI(parent, name, defaultKey, callback)
 
     return btn, updateKey
 end
+
+local invWindow = Instance.new("Frame")
+invWindow.Size = UDim2.new(0, 680, 0, 480)
+invWindow.Position = UDim2.new(0.5, -340, 0.5, -240)
+invWindow.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+invWindow.BorderSizePixel = 0
+invWindow.Visible = false
+invWindow.Parent = screenGui
+applyCorner(invWindow, 6)
+
+local invTopBar = Instance.new("Frame")
+invTopBar.Size = UDim2.new(1, 0, 0, 32)
+invTopBar.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
+invTopBar.BorderSizePixel = 0
+invTopBar.Parent = invWindow
+applyCorner(invTopBar, 6)
+
+local invTitle = Instance.new("TextLabel")
+invTitle.Size = UDim2.new(1, -12, 1, 0)
+invTitle.Position = UDim2.new(0, 10, 0, 0)
+invTitle.BackgroundTransparency = 1
+invTitle.TextColor3 = Color3.fromRGB(240, 240, 240)
+invTitle.TextSize = 13
+invTitle.Font = MAIN_FONT
+invTitle.Text = "INVENTORY VIEWER"
+invTitle.TextXAlignment = Enum.TextXAlignment.Left
+invTitle.Parent = invTopBar
+
+local invDragging, invDragInput, invDragStart, invStartPos
+invTopBar.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        invDragging = true
+        invDragStart = input.Position
+        invStartPos = invWindow.Position
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                invDragging = false
+            end
+        end)
+    end
+end)
+
+invTopBar.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+        invDragInput = input
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if input == invDragInput and invDragging then
+        local delta = input.Position - invDragStart
+        invWindow.Position = UDim2.new(invStartPos.X.Scale, invStartPos.X.Offset + delta.X, invStartPos.Y.Scale, invStartPos.Y.Offset + delta.Y)
+    end
+end)
+
+local invMainBody = Instance.new("Frame")
+invMainBody.Size = UDim2.new(1, -12, 1, -40)
+invMainBody.Position = UDim2.new(0, 6, 0, 34)
+invMainBody.BackgroundTransparency = 1
+invMainBody.Parent = invWindow
+
+local invLeftFrame = Instance.new("Frame")
+invLeftFrame.Size = UDim2.new(0, 460, 1, 0)
+invLeftFrame.Position = UDim2.new(0, 0, 0, 0)
+invLeftFrame.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
+invLeftFrame.BorderSizePixel = 0
+invLeftFrame.Parent = invMainBody
+applyCorner(invLeftFrame, 6)
+
+local invLeftTitle = Instance.new("TextLabel")
+invLeftTitle.Size = UDim2.new(1, 0, 0, 26)
+invLeftTitle.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+invLeftTitle.TextColor3 = Color3.fromRGB(240, 240, 240)
+invLeftTitle.TextSize = 13
+invLeftTitle.Font = MAIN_FONT
+invLeftTitle.Text = "INVENTORY"
+invLeftTitle.Parent = invLeftFrame
+applyCorner(invLeftTitle, 6)
+
+local invLeftScroll = Instance.new("ScrollingFrame")
+invLeftScroll.Size = UDim2.new(1, -12, 1, -34)
+invLeftScroll.Position = UDim2.new(0, 6, 0, 30)
+invLeftScroll.BackgroundTransparency = 1
+invLeftScroll.ScrollBarThickness = 4
+invLeftScroll.ScrollBarImageColor3 = Color3.fromRGB(80, 80, 80)
+invLeftScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+invLeftScroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
+invLeftScroll.Parent = invLeftFrame
+
+local invLeftLayout = Instance.new("UIListLayout")
+invLeftLayout.SortOrder = Enum.SortOrder.LayoutOrder
+invLeftLayout.Padding = UDim.new(0, 8)
+invLeftLayout.Parent = invLeftScroll
+
+local invRightFrame = Instance.new("Frame")
+invRightFrame.Size = UDim2.new(0, 202, 1, 0)
+invRightFrame.Position = UDim2.new(0, 466, 0, 0)
+invRightFrame.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
+invRightFrame.BorderSizePixel = 0
+invRightFrame.Parent = invMainBody
+applyCorner(invRightFrame, 6)
+
+local invRightTitle = Instance.new("TextLabel")
+invRightTitle.Size = UDim2.new(1, 0, 0, 26)
+invRightTitle.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+invRightTitle.TextColor3 = Color3.fromRGB(240, 240, 240)
+invRightTitle.TextSize = 13
+invRightTitle.Font = MAIN_FONT
+invRightTitle.Text = "GEAR / APPEARANCE"
+invRightTitle.Parent = invRightFrame
+applyCorner(invRightTitle, 6)
+
+local gearGridFrame = Instance.new("Frame")
+gearGridFrame.Size = UDim2.new(1, -10, 1, -34)
+gearGridFrame.Position = UDim2.new(0, 5, 0, 30)
+gearGridFrame.BackgroundTransparency = 1
+gearGridFrame.Parent = invRightFrame
+
+local gearSlots = {}
+local gearSlotDefinitions = {
+    {Name = "Headware", Label = "HEADWARE", SlotAttr = "ClothingHeadware", Pos = UDim2.new(0, 4, 0, 6)},
+    {Name = "Backpack", Label = "BACKPACK", SlotAttr = "ClothingBackpack", Pos = UDim2.new(0, 98, 0, 6)},
+    {Name = "ChestRig", Label = "CHEST RIG", SlotAttr = "ClothingChestRig", Pos = UDim2.new(0, 4, 0, 72)},
+    {Name = "ItemBack1", Label = "ITEM BACK 1", SlotAttr = "ItemBack1", Pos = UDim2.new(0, 98, 0, 72)},
+    {Name = "ItemBack2", Label = "ITEM BACK 2", SlotAttr = "ItemBack2", Pos = UDim2.new(0, 4, 0, 138)},
+    {Name = "ItemHip", Label = "ITEM HIP", SlotAttr = "ItemHip", Pos = UDim2.new(0, 98, 0, 138)},
+}
+
+for _, def in ipairs(gearSlotDefinitions) do
+    local slotFrame = Instance.new("Frame")
+    slotFrame.Size = UDim2.new(0, 90, 0, 60)
+    slotFrame.Position = def.Pos
+    slotFrame.BackgroundColor3 = Color3.fromRGB(38, 38, 38)
+    slotFrame.BorderSizePixel = 0
+    slotFrame.Parent = gearGridFrame
+    applyCorner(slotFrame, 4)
+
+    local lbl = Instance.new("TextLabel")
+    lbl.Size = UDim2.new(1, 0, 0, 14)
+    lbl.Position = UDim2.new(0, 0, 0, 3)
+    lbl.BackgroundTransparency = 1
+    lbl.TextColor3 = Color3.fromRGB(150, 150, 150)
+    lbl.TextSize = 10
+    lbl.Font = MAIN_FONT
+    lbl.Text = def.Label
+    lbl.Parent = slotFrame
+
+    local itemLbl = Instance.new("TextLabel")
+    itemLbl.Size = UDim2.new(1, -6, 1, -18)
+    itemLbl.Position = UDim2.new(0, 3, 0, 16)
+    itemLbl.BackgroundTransparency = 1
+    itemLbl.TextColor3 = Color3.fromRGB(240, 240, 240)
+    itemLbl.TextSize = 11
+    itemLbl.Font = MAIN_FONT
+    itemLbl.TextWrapped = true
+    itemLbl.Text = "Empty"
+    itemLbl.Parent = slotFrame
+
+    gearSlots[def.SlotAttr] = {Label = itemLbl, Frame = slotFrame}
+end
+
+local selectedTargetPlayer = LocalPlayer.Name
+local inventoryViewerEnabled = false
+local inventoryLoopToken = 0
+
+-- Helper function to fetch attachment data (sight & magazine)
+local function getItemAttachmentsInfo(itemObj)
+    if not itemObj then return nil, nil end
+    local attFolder = itemObj:FindFirstChild("Attachments")
+    local sightName = nil
+    local magName = nil
+    
+    if attFolder then
+        for _, child in ipairs(attFolder:GetChildren()) do
+            if child:GetAttribute("Slot") == "Sight" then
+                sightName = child.Name
+            elseif child:GetAttribute("Magazine") == true or child:GetAttribute("Magazine") ~= nil then
+                magName = child.Name
+            end
+        end
+    end
+    return sightName, magName
+end
+
+-- Future model preview helper (ready for when you transition to viewports)
+local function setupItemViewport(slotFrame, itemName)
+    local modelsFolder = ReplicatedStorage:FindFirstChild("ItemModels")
+    if not modelsFolder then return end
+    
+    local itemModel = modelsFolder:FindFirstChild(itemName)
+    if not itemModel then return end
+    
+    for _, child in ipairs(slotFrame:GetChildren()) do
+        if child:IsA("TextLabel") then
+            child.Visible = false
+        end
+    end
+    
+    local existingVp = slotFrame:FindFirstChild("ItemViewport")
+    if existingVp then existingVp:Destroy() end
+    
+    local vp = Instance.new("ViewportFrame")
+    vp.Name = "ItemViewport"
+    vp.Size = UDim2.new(1, 0, 1, 0)
+    vp.BackgroundTransparency = 1
+    vp.Parent = slotFrame
+    
+    local clone = itemModel:Clone()
+    clone.Parent = vp
+    
+    local cam = Instance.new("Camera")
+    vp.CurrentCamera = cam
+    cam.Parent = vp
+    
+    local cf, size = clone:GetBoundingBox()
+    local maxDim = math.max(size.X, size.Y, size.Z)
+    cam.CFrame = CFrame.new(cf.Position + (Vector3.new(1, 1, 1).Unit * (maxDim * 1.8)), cf.Position)
+end
+
+local function createGridCategory(title, maxSlots, itemsMap)
+    local header = Instance.new("TextLabel")
+    header.Size = UDim2.new(1, 0, 0, 18)
+    header.BackgroundTransparency = 1
+    header.TextColor3 = Color3.fromRGB(200, 200, 200)
+    header.TextSize = 12
+    header.Font = MAIN_FONT
+    header.TextXAlignment = Enum.TextXAlignment.Left
+    header.Text = string.upper(title)
+    header.Parent = invLeftScroll
+
+    local gridFrame = Instance.new("Frame")
+    gridFrame.Size = UDim2.new(1, 0, 0, math.ceil(maxSlots / 6) * 56)
+    gridFrame.BackgroundTransparency = 1
+    gridFrame.Parent = invLeftScroll
+
+    local gridLayout = Instance.new("UIGridLayout")
+    gridLayout.CellSize = UDim2.new(0, 52, 0, 52)
+    gridLayout.CellPadding = UDim2.new(0, 4, 0, 4)
+    gridLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    gridLayout.Parent = gridFrame
+
+    for i = 1, maxSlots do
+        local slot = Instance.new("Frame")
+        slot.BackgroundColor3 = Color3.fromRGB(38, 38, 38)
+        slot.BorderSizePixel = 0
+        slot.LayoutOrder = i
+        slot.Parent = gridFrame
+        applyCorner(slot, 4)
+
+        local itemData = itemsMap[i]
+        if itemData then
+            local sightName, magName = getItemAttachmentsInfo(itemData.Obj)
+            local displayText = itemData.Name
+            
+            if sightName then
+                displayText = displayText .. "\n" .. "<font size=\"8\" color=\"rgb(100,220,255)\">" .. sightName .. "</font>"
+            end
+            if magName then
+                displayText = displayText .. "\n" .. "<font size=\"8\" color=\"rgb(255,150,100)\">" .. magName .. "</font>"
+            end
+
+            local nameLbl = Instance.new("TextLabel")
+            nameLbl.Size = UDim2.new(1, -4, 1, -4)
+            nameLbl.Position = UDim2.new(0, 2, 0, 2)
+            nameLbl.BackgroundTransparency = 1
+            nameLbl.TextColor3 = Color3.fromRGB(240, 240, 240)
+            nameLbl.TextSize = 10
+            nameLbl.Font = MAIN_FONT
+            nameLbl.TextWrapped = true
+            nameLbl.RichText = true
+            nameLbl.Text = displayText
+            nameLbl.Parent = slot
+
+            if itemData.Amount and itemData.Amount > 1 then
+                local amtLbl = Instance.new("TextLabel")
+                amtLbl.Size = UDim2.new(0, 24, 0, 12)
+                amtLbl.Position = UDim2.new(0, 3, 0, 3)
+                amtLbl.BackgroundTransparency = 1
+                amtLbl.TextColor3 = Color3.fromRGB(255, 190, 0)
+                amtLbl.TextSize = 10
+                amtLbl.Font = MAIN_FONT
+                amtLbl.Text = tostring(itemData.Amount)
+                amtLbl.TextXAlignment = Enum.TextXAlignment.Left
+                amtLbl.Parent = slot
+            end
+        end
+    end
+end
+
+local function refreshInventoryDisplay()
+    for _, slotData in pairs(gearSlots) do
+        slotData.Label.Text = "Empty"
+        slotData.Label.TextColor3 = Color3.fromRGB(120, 120, 120)
+        slotData.Label.RichText = false
+    end
+
+    for _, child in ipairs(invLeftScroll:GetChildren()) do
+        if not child:IsA("UIListLayout") then
+            child:Destroy()
+        end
+    end
+
+    local repPlayers = ReplicatedStorage:FindFirstChild("Players")
+    if not repPlayers then return end
+    local pFolder = repPlayers:FindFirstChild(selectedTargetPlayer)
+    if not pFolder then return end
+    local invFolder = pFolder:FindFirstChild("Inventory")
+    if not invFolder then return end
+
+    invTitle.Text = "INVENTORY VIEWER - " .. selectedTargetPlayer
+
+    local categorizedItems = {
+        ChestRig = {},
+        Shirt = {},
+        Pants = {},
+        Backpack = {}
+    }
+
+    local function parseItem(itemObj)
+        local slotAttr = itemObj:GetAttribute("Slot") or ""
+        local amount = itemObj:GetAttribute("Amount") or 1
+
+        if gearSlots[slotAttr] then
+            local itemName = itemObj.Name
+            local sightName, magName = getItemAttachmentsInfo(itemObj)
+            local displayText = itemName
+            
+            if sightName then
+                displayText = displayText .. "\n" .. "<font size=\"8\" color=\"rgb(100,220,255)\">" .. sightName .. "</font>"
+            end
+            if magName then
+                displayText = displayText .. "\n" .. "<font size=\"8\" color=\"rgb(255,150,100)\">" .. magName .. "</font>"
+            end
+
+            gearSlots[slotAttr].Label.RichText = true
+            gearSlots[slotAttr].Label.Text = displayText
+            gearSlots[slotAttr].Label.TextColor3 = Color3.fromRGB(255, 255, 255)
+        end
+
+        local cat, indexStr = slotAttr:match("^([%a]+)(%d+)$")
+        if cat and indexStr then
+            local idx = tonumber(indexStr)
+            if categorizedItems[cat] then
+                categorizedItems[cat][idx] = {Name = itemObj.Name, Amount = amount, Obj = itemObj}
+            end
+        end
+
+        local nestedInv = itemObj:FindFirstChild("Inventory")
+        if nestedInv then
+            for _, subItem in ipairs(nestedInv:GetChildren()) do
+                parseItem(subItem)
+            end
+        end
+    end
+
+    for _, item in ipairs(invFolder:GetChildren()) do
+        parseItem(item)
+    end
+
+    createGridCategory("Chest Rig", 12, categorizedItems.ChestRig)
+    createGridCategory("Shirt", 6, categorizedItems.Shirt)
+    createGridCategory("Pants", 6, categorizedItems.Pants)
+    createGridCategory("Backpack", 30, categorizedItems.Backpack)
+end
+
+local function getPlayerNamesList()
+    local list = {}
+    for _, p in ipairs(Players:GetPlayers()) do
+        table.insert(list, p.Name)
+    end
+    return list
+end
+
+createButtonUI(visualsContainer, "Refresh Player List", function()
+    updateInvPlayerDropdown(getPlayerNamesList())
+end)
+
+local _, _, updateInvPlayerDropdown = createDropdownUI(visualsContainer, "Select Player", getPlayerNamesList(), selectedTargetPlayer, function(val)
+    selectedTargetPlayer = val
+    if inventoryViewerEnabled then
+        refreshInventoryDisplay()
+    end
+end)
+
+local _, setInvViewerUI = createToggleUI(visualsContainer, "Inventory Viewer", false, function(val)
+    inventoryViewerEnabled = val
+    invWindow.Visible = val
+    inventoryLoopToken = inventoryLoopToken + 1
+    local currentToken = inventoryLoopToken
+
+    if val then
+        refreshInventoryDisplay()
+        task.spawn(function()
+            while inventoryViewerEnabled and currentToken == inventoryLoopToken do
+                task.wait(5)
+                if inventoryViewerEnabled and currentToken == inventoryLoopToken then
+                    refreshInventoryDisplay()
+                end
+            end
+        end)
+    end
+end)
+
+local aimbotInvViewerEnabled = false
+local aimbotInvKey = Enum.KeyCode.H
+
+local _, setAimbotInvViewerUI = createToggleUI(visualsContainer, "Aimbot Inventory Viewer", false, function(val)
+    aimbotInvViewerEnabled = val
+end)
+
+createKeybindUI(visualsContainer, "Aimbot Inv Key", aimbotInvKey, function(key)
+    aimbotInvKey = key
+end)
+
+local visualSpacer = Instance.new("Frame")
+visualSpacer.Size = UDim2.new(1, -8, 0, 10)
+visualSpacer.BackgroundTransparency = 1
+visualSpacer.Parent = visualsContainer
 
 local playerESPEnabled = true
 local gearESPEnabled = false
@@ -648,7 +1093,6 @@ local function isTeammate(target)
 
     for _, clanFolder in ipairs(clansFolder:GetChildren()) do
         local ownerName = clanFolder.Name:gsub("'s team$", "")
-        local isMember = false
         if ownerName == localPlayerName then
             localTeamFolder = clanFolder
         end
@@ -787,6 +1231,7 @@ local TargetNpcs_S = true
 local CircleVisible = true
 local TriggerbotEnabled = false
 local TriggerbotBurstLimit = 0
+local silentTeamCheckEnabled = true
 
 local SilentFOVRadius = 150
 local SilentHitChance = 100
@@ -813,6 +1258,44 @@ local isTriggerbotHolding = false
 local triggerbotShotCount = 0
 local lastTriggerbotTime = 0
 
+local function isSilentTeammate(target)
+    if not silentTeamCheckEnabled then return false end
+    local targetName = getPlayerNameFromTarget(target)
+    if not targetName then return false end
+
+    local clansFolder = ReplicatedStorage:FindFirstChild("Clans")
+    if not clansFolder then return false end
+
+    local localPlayerName = LocalPlayer.Name
+    local localTeamFolder = nil
+    local targetTeamFolder = nil
+
+    for _, clanFolder in ipairs(clansFolder:GetChildren()) do
+        local ownerName = clanFolder.Name:gsub("'s team$", "")
+        if ownerName == localPlayerName then
+            localTeamFolder = clanFolder
+        end
+        if ownerName == targetName then
+            targetTeamFolder = clanFolder
+        end
+
+        for _, member in ipairs(clanFolder:GetChildren()) do
+            if member.Name == localPlayerName then
+                localTeamFolder = clanFolder
+            end
+            if member.Name == targetName then
+                targetTeamFolder = clanFolder
+            end
+        end
+    end
+
+    if localTeamFolder and targetTeamFolder and localTeamFolder == targetTeamFolder then
+        return true
+    end
+
+    return false
+end
+
 local function getValidHitParts(char)
     local parts = {}
     if TargetHead_S and char:FindFirstChild("Head") then table.insert(parts, char.Head) end
@@ -833,7 +1316,7 @@ local function getClosestSilentCharacter()
 
     for _, player in ipairs(Players:GetPlayers()) do
         if player ~= LocalPlayer and player.Character then
-            if not isTeammate(player) then
+            if not isSilentTeammate(player) then
                 local char = player.Character
                 local hum = char:FindFirstChildOfClass("Humanoid")
                 local parts = getValidHitParts(char)
@@ -857,7 +1340,7 @@ local function getClosestSilentCharacter()
             for _, zoneFolder in ipairs(aiZonesFolder:GetChildren()) do
                 for _, npc in ipairs(zoneFolder:GetChildren()) do
                     if npc:IsA("Model") and npc:FindFirstChild("Humanoid") and npc.Humanoid.Health > 0 then
-                        if not isTeammate(npc) then
+                        if not isSilentTeammate(npc) then
                             local parts = getValidHitParts(npc)
                             if #parts > 0 then
                                 local head = npc:FindFirstChild("Head") or parts[1]
@@ -1215,19 +1698,20 @@ _, setNpcESP = createToggleUI(visualsContainer, "NPC ESP", npcESPEnabled, functi
     end
 end)
 
-createButtonUI(visualsContainer, "Remove Visors & Flashbang", function()
-    local noInset = LocalPlayer:FindFirstChild("PlayerGui") and LocalPlayer.PlayerGui:FindFirstChild("NoInsetGui")
-    if noInset then
-        local mainF = noInset:FindFirstChild("MainFrame")
-        if mainF then
-            local effects = mainF:FindFirstChild("ScreenEffects")
-            if effects then
-                local vFolder = effects:FindFirstChild("Visor")
-                if vFolder then vFolder:Destroy() end
-                local mFolder = effects:FindFirstChild("Mask")
-                if mFolder then mFolder:Destroy() end
-                local fFolder = effects:FindFirstChild("Flashbang")
-                if fFolder then fFolder:Destroy() end
+createButtonUI(visualsContainer, "Remove Visor Folder", function()
+    local success = pcall(function()
+        Players.LocalPlayer.PlayerGui.NoInsetGui.MainFrame.ScreenEffects.Visor:Destroy()
+    end)
+    if not success then
+        local noInset = LocalPlayer:FindFirstChild("PlayerGui") and LocalPlayer.PlayerGui:FindFirstChild("NoInsetGui")
+        if noInset then
+            local mainF = noInset:FindFirstChild("MainFrame")
+            if mainF then
+                local effects = mainF:FindFirstChild("ScreenEffects")
+                if effects then
+                    local vFolder = effects:FindFirstChild("Visor")
+                    if vFolder then vFolder:Destroy() end
+                end
             end
         end
     end
@@ -1344,6 +1828,15 @@ UserInputService.InputBegan:Connect(function(input, gameProcessedEvent)
         else
             ResetTarget()
         end
+        return
+    end
+
+    if input.KeyCode == aimbotInvKey then
+        if aimbotInvViewerEnabled and currentTarget and currentTarget:IsA("Player") then
+            selectedTargetPlayer = currentTarget.Name
+            setInvViewerUI(not inventoryViewerEnabled, true)
+        end
+        return
     end
 end)
 
@@ -1408,6 +1901,10 @@ _, setSilentAimUI = createToggleUI(silentContainer, "Silent Aim", SilentAimEnabl
             isTriggerbotHolding = false
         end
     end
+end)
+
+createToggleUI(silentContainer, "Team Check", silentTeamCheckEnabled, function(val)
+    silentTeamCheckEnabled = val
 end)
 
 createToggleUI(silentContainer, "FOV Circle", CircleVisible, function(val)
@@ -1534,14 +2031,15 @@ if not isfolder(folderName) then
 end
 
 local configNameBox = Instance.new("TextBox")
-configNameBox.Size = UDim2.new(1, -10, 0, 28)
-configNameBox.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+configNameBox.Size = UDim2.new(1, -8, 0, 28)
+configNameBox.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
 configNameBox.TextColor3 = Color3.fromRGB(255, 255, 255)
 configNameBox.TextSize = 12
-configNameBox.Font = Enum.Font.SourceSansBold
-configNameBox.PlaceholderText = "Enter Config Name..."
+configNameBox.Font = MAIN_FONT
+configNameBox.PlaceholderText = "ENTER CONFIG NAME..."
 configNameBox.Text = ""
 configNameBox.Parent = configContainer
+applyCorner(configNameBox, 4)
 
 local function getConfigsList()
     local files = listfiles(folderName)
@@ -1666,52 +2164,56 @@ local function resetToDefault()
 end
 
 local saveBtn = Instance.new("TextButton")
-saveBtn.Size = UDim2.new(1, -10, 0, 28)
-saveBtn.BackgroundColor3 = Color3.fromRGB(0, 100, 0)
+saveBtn.Size = UDim2.new(1, -8, 0, 28)
+saveBtn.BackgroundColor3 = Color3.fromRGB(35, 110, 50)
 saveBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 saveBtn.TextSize = 12
-saveBtn.Font = Enum.Font.SourceSansBold
-saveBtn.Text = "Save Config"
+saveBtn.Font = MAIN_FONT
+saveBtn.Text = "SAVE CONFIG"
 saveBtn.Parent = configContainer
+applyCorner(saveBtn, 4)
 
 saveBtn.MouseButton1Click:Connect(function()
     saveCurrentConfig()
 end)
 
 local loadBtn = Instance.new("TextButton")
-loadBtn.Size = UDim2.new(1, -10, 0, 28)
-loadBtn.BackgroundColor3 = Color3.fromRGB(100, 0, 0)
+loadBtn.Size = UDim2.new(1, -8, 0, 28)
+loadBtn.BackgroundColor3 = Color3.fromRGB(110, 35, 35)
 loadBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 loadBtn.TextSize = 12
-loadBtn.Font = Enum.Font.SourceSansBold
-loadBtn.Text = "Load Selected Config"
+loadBtn.Font = MAIN_FONT
+loadBtn.Text = "LOAD SELECTED CONFIG"
 loadBtn.Parent = configContainer
+applyCorner(loadBtn, 4)
 
 loadBtn.MouseButton1Click:Connect(function()
     loadConfigByName(configNameBox.Text)
 end)
 
 local resetBtn = Instance.new("TextButton")
-resetBtn.Size = UDim2.new(1, -10, 0, 28)
-resetBtn.BackgroundColor3 = Color3.fromRGB(100, 70, 0)
+resetBtn.Size = UDim2.new(1, -8, 0, 28)
+resetBtn.BackgroundColor3 = Color3.fromRGB(110, 75, 35)
 resetBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 resetBtn.TextSize = 12
-resetBtn.Font = Enum.Font.SourceSansBold
-resetBtn.Text = "Reset to Default"
+resetBtn.Font = MAIN_FONT
+resetBtn.Text = "RESET TO DEFAULT"
 resetBtn.Parent = configContainer
+applyCorner(resetBtn, 4)
 
 resetBtn.MouseButton1Click:Connect(function()
     resetToDefault()
 end)
 
 local removeAllBtn = Instance.new("TextButton")
-removeAllBtn.Size = UDim2.new(1, -10, 0, 28)
-removeAllBtn.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
+removeAllBtn.Size = UDim2.new(1, -8, 0, 28)
+removeAllBtn.BackgroundColor3 = Color3.fromRGB(140, 35, 35)
 removeAllBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 removeAllBtn.TextSize = 12
-removeAllBtn.Font = Enum.Font.SourceSansBold
-removeAllBtn.Text = "Remove All Configs"
+removeAllBtn.Font = MAIN_FONT
+removeAllBtn.Text = "REMOVE ALL CONFIGS"
 removeAllBtn.Parent = configContainer
+applyCorner(removeAllBtn, 4)
 
 removeAllBtn.MouseButton1Click:Connect(function()
     local files = listfiles(folderName)
