@@ -571,7 +571,6 @@ local selectedTargetPlayer = LocalPlayer.Name
 local inventoryViewerEnabled = false
 local inventoryLoopToken = 0
 
--- Helper function to fetch attachment data (sight & magazine)
 local function getItemAttachmentsInfo(itemObj)
     if not itemObj then return nil, nil end
     local attFolder = itemObj:FindFirstChild("Attachments")
@@ -590,7 +589,6 @@ local function getItemAttachmentsInfo(itemObj)
     return sightName, magName
 end
 
--- Future model preview helper (ready for when you transition to viewports)
 local function setupItemViewport(slotFrame, itemName)
     local modelsFolder = ReplicatedStorage:FindFirstChild("ItemModels")
     if not modelsFolder then return end
@@ -1700,7 +1698,13 @@ end)
 
 createButtonUI(visualsContainer, "Remove Visor Folder", function()
     local success = pcall(function()
-        Players.LocalPlayer.PlayerGui.NoInsetGui.MainFrame.ScreenEffects.Visor:Destroy()
+        local visor = Players.LocalPlayer.PlayerGui.NoInsetGui.MainFrame.ScreenEffects.Visor
+        if visor then
+            local maska = visor:FindFirstChild("MaskaVisor")
+            local altyn = visor:FindFirstChild("AltynVisor")
+            if maska then maska:Destroy() end
+            if altyn then altyn:Destroy() end
+        end
     end)
     if not success then
         local noInset = LocalPlayer:FindFirstChild("PlayerGui") and LocalPlayer.PlayerGui:FindFirstChild("NoInsetGui")
@@ -1710,7 +1714,12 @@ createButtonUI(visualsContainer, "Remove Visor Folder", function()
                 local effects = mainF:FindFirstChild("ScreenEffects")
                 if effects then
                     local vFolder = effects:FindFirstChild("Visor")
-                    if vFolder then vFolder:Destroy() end
+                    if vFolder then
+                        local maska = vFolder:FindFirstChild("MaskaVisor")
+                        local altyn = vFolder:FindFirstChild("AltynVisor")
+                        if maska then maska:Destroy() end
+                        if altyn then altyn:Destroy() end
+                    end
                 end
             end
         end
