@@ -606,6 +606,7 @@ end
 local AimbotMasterEnabled = true
 local AimbotEnabled = false
 local aimNpcEnabled = true
+local teamCheckEnabled = true
 local smoothing = 0.2
 local predictionFactor = 0.12
 local AimPart = "Head"
@@ -623,7 +624,59 @@ local originalRecoilValues = {}
 local setAimbotMasterUI = nil
 local setSilentAimUI = nil
 
+local function getPlayerNameFromTarget(target)
+    if not target then return nil end
+    if target:IsA("Player") then
+        return target.Name
+    elseif target:IsA("Model") then
+        return target.Name
+    end
+    return nil
+end
+
+local function isTeammate(target)
+    if not teamCheckEnabled then return false end
+    local targetName = getPlayerNameFromTarget(target)
+    if not targetName then return false end
+
+    local clansFolder = ReplicatedStorage:FindFirstChild("Clans")
+    if not clansFolder then return false end
+
+    local localPlayerName = LocalPlayer.Name
+    local localTeamFolder = nil
+    local targetTeamFolder = nil
+
+    for _, clanFolder in ipairs(clansFolder:GetChildren()) do
+        local ownerName = clanFolder.Name:gsub("'s team$", "")
+        local isMember = false
+        if ownerName == localPlayerName then
+            localTeamFolder = clanFolder
+        end
+        if ownerName == targetName then
+            targetTeamFolder = clanFolder
+        end
+
+        for _, member in ipairs(clanFolder:GetChildren()) do
+            if member.Name == localPlayerName then
+                localTeamFolder = clanFolder
+            end
+            if member.Name == targetName then
+                targetTeamFolder = clanFolder
+            end
+        end
+    end
+
+    if localTeamFolder and targetTeamFolder and localTeamFolder == targetTeamFolder then
+        return true
+    end
+
+    return false
+end
+
 local function isTargetValid(target)
+    if not target then return false end
+    if isTeammate(target) then return false end
+
     if target:IsA("Player") then
         local char = target.Character
         if char and char:FindFirstChild(AimPart) and char:FindFirstChild("Humanoid") and char.Humanoid.Health > 0 then
@@ -650,14 +703,16 @@ local function getClosestTarget(cam)
            and player.Character:FindFirstChild("Humanoid") 
            and player.Character.Humanoid.Health > 0 then
 
-            local char = player.Character
-            local screenPoint, onScreen = cam:WorldToViewportPoint(char[AimPart].Position)
-            local distanceFromCenter = (Vector2.new(screenPoint.X, screenPoint.Y) - screenCenter).Magnitude
+            if not isTeammate(player) then
+                local char = player.Character
+                local screenPoint, onScreen = cam:WorldToViewportPoint(char[AimPart].Position)
+                local distanceFromCenter = (Vector2.new(screenPoint.X, screenPoint.Y) - screenCenter).Magnitude
 
-            if onScreen then
-                if distanceFromCenter < closestMag then
-                    closestMag = distanceFromCenter
-                    target = player
+                if onScreen then
+                    if distanceFromCenter < closestMag then
+                        closestMag = distanceFromCenter
+                        target = player
+                    end
                 end
             end
         end
@@ -669,12 +724,14 @@ local function getClosestTarget(cam)
             for _, zoneFolder in ipairs(aiZonesFolder:GetChildren()) do
                 for _, npc in ipairs(zoneFolder:GetChildren()) do
                     if npc:IsA("Model") and npc:FindFirstChild(AimPart) and npc:FindFirstChild("Humanoid") and npc.Humanoid.Health > 0 then
-                        local screenPoint, onScreen = cam:WorldToViewportPoint(npc[AimPart].Position)
-                        local distanceFromCenter = (Vector2.new(screenPoint.X, screenPoint.Y) - screenCenter).Magnitude
-                        if onScreen then
-                            if distanceFromCenter < closestMag then
-                                closestMag = distanceFromCenter
-                                target = npc
+                        if not isTeammate(npc) then
+                            local screenPoint, onScreen = cam:WorldToViewportPoint(npc[AimPart].Position)
+                            local distanceFromCenter = (Vector2.new(screenPoint.X, screenPoint.Y) - screenCenter).Magnitude
+                            if onScreen then
+                                if distanceFromCenter < closestMag then
+                                    closestMag = distanceFromCenter
+                                    target = npc
+                                end
                             end
                         end
                     end
@@ -776,16 +833,18 @@ local function getClosestSilentCharacter()
 
     for _, player in ipairs(Players:GetPlayers()) do
         if player ~= LocalPlayer and player.Character then
-            local char = player.Character
-            local hum = char:FindFirstChildOfClass("Humanoid")
-            local parts = getValidHitParts(char)
-            if hum and hum.Health > 0 and #parts > 0 then
-                local head = char:FindFirstChild("Head") or parts[1]
-                local screenPos, onScreen = cam:WorldToViewportPoint(head.Position)
-                if onScreen then
-                    local dist = (Vector2.new(screenPos.X, screenPos.Y) - mousePos).Magnitude
-                    if dist <= SilentFOVRadius then
-                        table.insert(candidates, {char = char, dist = dist, parts = parts})
+            if not isTeammate(player) then
+                local char = player.Character
+                local hum = char:FindFirstChildOfClass("Humanoid")
+                local parts = getValidHitParts(char)
+                if hum and hum.Health > 0 and #parts > 0 then
+                    local head = char:FindFirstChild("Head") or parts[1]
+                    local screenPos, onScreen = cam:WorldToViewportPoint(head.Position)
+                    if onScreen then
+                        local dist = (Vector2.new(screenPos.X, screenPos.Y) - mousePos).Magnitude
+                        if dist <= SilentFOVRadius then
+                            table.insert(candidates, {char = char, dist = dist, parts = parts})
+                        end
                     end
                 end
             end
@@ -798,14 +857,16 @@ local function getClosestSilentCharacter()
             for _, zoneFolder in ipairs(aiZonesFolder:GetChildren()) do
                 for _, npc in ipairs(zoneFolder:GetChildren()) do
                     if npc:IsA("Model") and npc:FindFirstChild("Humanoid") and npc.Humanoid.Health > 0 then
-                        local parts = getValidHitParts(npc)
-                        if #parts > 0 then
-                            local head = npc:FindFirstChild("Head") or parts[1]
-                            local screenPos, onScreen = cam:WorldToViewportPoint(head.Position)
-                            if onScreen then
-                                local dist = (Vector2.new(screenPos.X, screenPos.Y) - mousePos).Magnitude
-                                if dist <= SilentFOVRadius then
-                                    table.insert(candidates, {char = npc, dist = dist, parts = parts})
+                        if not isTeammate(npc) then
+                            local parts = getValidHitParts(npc)
+                            if #parts > 0 then
+                                local head = npc:FindFirstChild("Head") or parts[1]
+                                local screenPos, onScreen = cam:WorldToViewportPoint(head.Position)
+                                if onScreen then
+                                    local dist = (Vector2.new(screenPos.X, screenPos.Y) - mousePos).Magnitude
+                                    if dist <= SilentFOVRadius then
+                                        table.insert(candidates, {char = npc, dist = dist, parts = parts})
+                                    end
                                 end
                             end
                         end
@@ -1130,7 +1191,7 @@ Players.PlayerAdded:Connect(function(player)
 end)
 Players.PlayerRemoving:Connect(function(player) removePlayerESP(player) end)
 
-local _, setPlayerESP = createToggleUI(visualsContainer, "Player ESP", playerESPEnabled, function(val)
+_, setPlayerESP = createToggleUI(visualsContainer, "Player ESP", playerESPEnabled, function(val)
     playerESPEnabled = val
     if not val then
         for _, d in pairs(playerObjects) do
@@ -1140,11 +1201,11 @@ local _, setPlayerESP = createToggleUI(visualsContainer, "Player ESP", playerESP
     end
 end)
 
-local _, setGearESP = createToggleUI(visualsContainer, "Gear ESP", gearESPEnabled, function(val)
+_, setGearESP = createToggleUI(visualsContainer, "Gear ESP", gearESPEnabled, function(val)
     gearESPEnabled = val
 end)
 
-local _, setNpcESP = createToggleUI(visualsContainer, "NPC ESP", npcESPEnabled, function(val)
+_, setNpcESP = createToggleUI(visualsContainer, "NPC ESP", npcESPEnabled, function(val)
     npcESPEnabled = val
     if not val then
         for _, d in pairs(npcObjects) do
@@ -1304,6 +1365,13 @@ end)
 local _, setAimNpc = createToggleUI(aimbotContainer, "Aim NPCs", aimNpcEnabled, function(val)
     aimNpcEnabled = val
     if not val and currentTarget and currentTarget:IsA("Model") then
+        ResetTarget()
+    end
+end)
+
+local _, setTeamCheck = createToggleUI(aimbotContainer, "Team Check", teamCheckEnabled, function(val)
+    teamCheckEnabled = val
+    if val and currentTarget and isTeammate(currentTarget) then
         ResetTarget()
     end
 end)
@@ -1521,6 +1589,7 @@ local function saveCurrentConfig()
         fullbright = fullbrightEnabled,
         aimbotMaster = AimbotMasterEnabled,
         aimNpc = aimNpcEnabled,
+        teamCheck = teamCheckEnabled,
         smoothing = smoothing,
         predictionFactor = predictionFactor,
         aimPart = AimPart,
@@ -1564,6 +1633,7 @@ local function loadConfigByName(cfgName)
             if data.fullbright ~= nil then setFullbright(data.fullbright, true) end
             if data.aimbotMaster ~= nil then setAimbotMasterUI(data.aimbotMaster, true) end
             if data.aimNpc ~= nil then setAimNpc(data.aimNpc, true) end
+            if data.teamCheck ~= nil then setTeamCheck(data.teamCheck, true) end
             if data.smoothing ~= nil then setSmoothing(data.smoothing, true) end
             if data.predictionFactor ~= nil then setPrediction(data.predictionFactor, true) end
             if data.aimPart ~= nil then setAimPart(data.aimPart, true) end
@@ -1584,6 +1654,7 @@ local function resetToDefault()
     setFullbright(false, true)
     setAimbotMasterUI(true, true)
     setAimNpc(true, true)
+    setTeamCheck(true, true)
     setSmoothing(0.2, true)
     setPrediction(0.12, true)
     setAimPart("Head", true)
