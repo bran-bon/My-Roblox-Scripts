@@ -1,5 +1,5 @@
 local UserInputService = game:GetService("UserInputService")
-local Players = game:GetService("Players")
+local Players = game:GetService("Players")  
 local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -258,19 +258,22 @@ local function createDropdownUI(parent, name, options, initialVal, callback)
             end
         end
 
-        for _, opt in ipairs(newOptions) do
+        for _, itemData in ipairs(newOptions) do
+            local optName = type(itemData) == "table" and itemData.Name or tostring(itemData)
+            local isHighlighted = type(itemData) == "table" and itemData.Highlight or false
+
             local optBtn = Instance.new("TextButton")
             optBtn.Size = UDim2.new(1, 0, 0, 25)
             optBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-            optBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
+            optBtn.TextColor3 = isHighlighted and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(200, 200, 200)
             optBtn.TextSize = 11
             optBtn.Font = MAIN_FONT
-            optBtn.Text = opt
+            optBtn.Text = optName
             optBtn.ZIndex = 6
             optBtn.Parent = listFrame
 
             optBtn.MouseButton1Click:Connect(function()
-                selectOpt(opt, true)
+                selectOpt(optName, true)
             end)
         end
 
@@ -589,38 +592,51 @@ local function getItemAttachmentsInfo(itemObj)
     return sightName, magName
 end
 
-local function setupItemViewport(slotFrame, itemName)
-    local modelsFolder = ReplicatedStorage:FindFirstChild("ItemModels")
-    if not modelsFolder then return end
-    
-    local itemModel = modelsFolder:FindFirstChild(itemName)
-    if not itemModel then return end
-    
-    for _, child in ipairs(slotFrame:GetChildren()) do
-        if child:IsA("TextLabel") then
-            child.Visible = false
+local function shouldWarnItem(itemName, sightName)
+    if itemName == "FlareGun" then
+        return true
+    end
+    if itemName == "HSPV" then
+        return true
+    end
+    if sightName == "Reapir" then
+        return true
+    end
+    return false
+end
+
+local function checkPlayerHasWarnedItem(playerName)
+    local repPlayers = ReplicatedStorage:FindFirstChild("Players")
+    if not repPlayers then return false end
+    local pFolder = repPlayers:FindFirstChild(playerName)
+    if not pFolder then return false end
+    local invFolder = pFolder:FindFirstChild("Inventory")
+    if not invFolder then return end
+
+    local function scanItem(itemObj)
+        local itemName = itemObj.Name
+        local sightName, _ = getItemAttachmentsInfo(itemObj)
+        if shouldWarnItem(itemName, sightName) then
+            return true
+        end
+
+        local nestedInv = itemObj:FindFirstChild("Inventory")
+        if nestedInv then
+            for _, subItem in ipairs(nestedInv:GetChildren()) do
+                if scanItem(subItem) then
+                    return true
+                end
+            end
+        end
+        return false
+    end
+
+    for _, item in ipairs(invFolder:GetChildren()) do
+        if scanItem(item) then
+            return true
         end
     end
-    
-    local existingVp = slotFrame:FindFirstChild("ItemViewport")
-    if existingVp then existingVp:Destroy() end
-    
-    local vp = Instance.new("ViewportFrame")
-    vp.Name = "ItemViewport"
-    vp.Size = UDim2.new(1, 0, 1, 0)
-    vp.BackgroundTransparency = 1
-    vp.Parent = slotFrame
-    
-    local clone = itemModel:Clone()
-    clone.Parent = vp
-    
-    local cam = Instance.new("Camera")
-    vp.CurrentCamera = cam
-    cam.Parent = vp
-    
-    local cf, size = clone:GetBoundingBox()
-    local maxDim = math.max(size.X, size.Y, size.Z)
-    cam.CFrame = CFrame.new(cf.Position + (Vector3.new(1, 1, 1).Unit * (maxDim * 1.8)), cf.Position)
+    return false
 end
 
 local function createGridCategory(title, maxSlots, itemsMap)
@@ -657,9 +673,11 @@ local function createGridCategory(title, maxSlots, itemsMap)
         if itemData then
             local sightName, magName = getItemAttachmentsInfo(itemData.Obj)
             local displayText = itemData.Name
+            local isWarned = shouldWarnItem(itemData.Name, sightName)
             
             if sightName then
-                displayText = displayText .. "\n" .. "<font size=\"8\" color=\"rgb(100,220,255)\">" .. sightName .. "</font>"
+                local sightColorHex = (sightName == "Reapir") and "rgb(255,50,50)" or "rgb(100,220,255)"
+                displayText = displayText .. "\n" .. "<font size=\"8\" color=\"" .. sightColorHex .. "\">" .. sightName .. "</font>"
             end
             if magName then
                 displayText = displayText .. "\n" .. "<font size=\"8\" color=\"rgb(255,150,100)\">" .. magName .. "</font>"
@@ -669,7 +687,7 @@ local function createGridCategory(title, maxSlots, itemsMap)
             nameLbl.Size = UDim2.new(1, -4, 1, -4)
             nameLbl.Position = UDim2.new(0, 2, 0, 2)
             nameLbl.BackgroundTransparency = 1
-            nameLbl.TextColor3 = Color3.fromRGB(240, 240, 240)
+            nameLbl.TextColor3 = isWarned and Color3.fromRGB(255, 50, 50) or Color3.fromRGB(240, 240, 240)
             nameLbl.TextSize = 10
             nameLbl.Font = MAIN_FONT
             nameLbl.TextWrapped = true
@@ -730,9 +748,11 @@ local function refreshInventoryDisplay()
             local itemName = itemObj.Name
             local sightName, magName = getItemAttachmentsInfo(itemObj)
             local displayText = itemName
+            local isWarned = shouldWarnItem(itemName, sightName)
             
             if sightName then
-                displayText = displayText .. "\n" .. "<font size=\"8\" color=\"rgb(100,220,255)\">" .. sightName .. "</font>"
+                local sightColorHex = (sightName == "Reapir") and "rgb(255,50,50)" or "rgb(100,220,255)"
+                displayText = displayText .. "\n" .. "<font size=\"8\" color=\"" .. sightColorHex .. "\">" .. sightName .. "</font>"
             end
             if magName then
                 displayText = displayText .. "\n" .. "<font size=\"8\" color=\"rgb(255,150,100)\">" .. magName .. "</font>"
@@ -740,7 +760,7 @@ local function refreshInventoryDisplay()
 
             gearSlots[slotAttr].Label.RichText = true
             gearSlots[slotAttr].Label.Text = displayText
-            gearSlots[slotAttr].Label.TextColor3 = Color3.fromRGB(255, 255, 255)
+            gearSlots[slotAttr].Label.TextColor3 = isWarned and Color3.fromRGB(255, 50, 50) or Color3.fromRGB(255, 255, 255)
         end
 
         local cat, indexStr = slotAttr:match("^([%a]+)(%d+)$")
@@ -772,20 +792,21 @@ end
 local function getPlayerNamesList()
     local list = {}
     for _, p in ipairs(Players:GetPlayers()) do
-        table.insert(list, p.Name)
+        local hasWarned = checkPlayerHasWarnedItem(p.Name)
+        table.insert(list, {Name = p.Name, Highlight = hasWarned})
     end
     return list
 end
-
-createButtonUI(visualsContainer, "Refresh Player List", function()
-    updateInvPlayerDropdown(getPlayerNamesList())
-end)
 
 local _, _, updateInvPlayerDropdown = createDropdownUI(visualsContainer, "Select Player", getPlayerNamesList(), selectedTargetPlayer, function(val)
     selectedTargetPlayer = val
     if inventoryViewerEnabled then
         refreshInventoryDisplay()
     end
+end)
+
+createButtonUI(visualsContainer, "Refresh Player List", function()
+    updateInvPlayerDropdown(getPlayerNamesList())
 end)
 
 local _, setInvViewerUI = createToggleUI(visualsContainer, "Inventory Viewer", false, function(val)
