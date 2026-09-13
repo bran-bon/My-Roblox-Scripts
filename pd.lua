@@ -19,6 +19,28 @@ GuiService.AutoSelectGuiEnabled = false
 
 local MAIN_FONT = Enum.Font.GothamMedium
 
+-- Theme Customization State & Color Registry
+local ThemeColors = {
+    MainBackground = Color3.fromRGB(22, 22, 22),
+    TopBar = Color3.fromRGB(32, 32, 32),
+    ButtonBackground = Color3.fromRGB(45, 45, 45),
+    ButtonHover = Color3.fromRGB(60, 60, 60),
+    TextPrimary = Color3.fromRGB(240, 240, 240),
+    TextSecondary = Color3.fromRGB(160, 160, 160),
+    EnabledColor = Color3.fromRGB(35, 110, 50),
+    DisabledColor = Color3.fromRGB(110, 35, 35),
+    SliderBackground = Color3.fromRGB(50, 50, 50),
+}
+
+local themeElementsTracker = {
+    MainBackgrounds = {},
+    TopBars = {},
+    Buttons = {},
+    Texts = {},
+    Toggles = {},
+    Sliders = {},
+}
+
 local function applyCorner(parent, radius)
     local corner = Instance.new("UICorner")
     corner.CornerRadius = UDim.new(0, radius or 6)
@@ -32,26 +54,29 @@ screenGui.ResetOnSpawn = false
 screenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
 
 local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0, 360, 0, 430)
+mainFrame.Size = UDim2.new(0, 480, 0, 430) -- widened from 410 to 480 to accommodate the Themes tab
 mainFrame.Position = UDim2.new(0, 50, 0, 150)
-mainFrame.BackgroundColor3 = Color3.fromRGB(22, 22, 22)
+mainFrame.BackgroundColor3 = ThemeColors.MainBackground
 mainFrame.BorderSizePixel = 0
 mainFrame.Parent = screenGui
 applyCorner(mainFrame, 8)
+table.insert(themeElementsTracker.MainBackgrounds, mainFrame)
 
 local topBar = Instance.new("Frame")
 topBar.Size = UDim2.new(1, 0, 0, 36)
-topBar.BackgroundColor3 = Color3.fromRGB(32, 32, 32)
+topBar.BackgroundColor3 = ThemeColors.TopBar
 topBar.BorderSizePixel = 0
 topBar.Parent = mainFrame
 applyCorner(topBar, 8)
+table.insert(themeElementsTracker.TopBars, topBar)
 
 local topBarCover = Instance.new("Frame")
 topBarCover.Size = UDim2.new(1, 0, 0, 10)
 topBarCover.Position = UDim2.new(0, 0, 1, -10)
-topBarCover.BackgroundColor3 = Color3.fromRGB(32, 32, 32)
+topBarCover.BackgroundColor3 = ThemeColors.TopBar
 topBarCover.BorderSizePixel = 0
 topBarCover.Parent = topBar
+table.insert(themeElementsTracker.TopBars, topBarCover)
 
 local dragging, dragInput, dragStart, startPos
 topBar.InputBegan:Connect(function(input)
@@ -81,39 +106,42 @@ UserInputService.InputChanged:Connect(function(input)
 end)
 
 local titleLabel = Instance.new("TextLabel")
-titleLabel.Size = UDim2.new(0, 90, 1, 0)
+titleLabel.Size = UDim2.new(0, 80, 1, 0)
 titleLabel.Position = UDim2.new(0, 10, 0, 0)
 titleLabel.BackgroundTransparency = 1
-titleLabel.TextColor3 = Color3.fromRGB(240, 240, 240)
+titleLabel.TextColor3 = ThemeColors.TextPrimary
 titleLabel.TextSize = 14
 titleLabel.Font = MAIN_FONT
 titleLabel.Text = "FUR HUB"
 titleLabel.TextXAlignment = Enum.TextXAlignment.Left
 titleLabel.Parent = topBar
+table.insert(themeElementsTracker.Texts, titleLabel)
 
 local tabContainer = Instance.new("Frame")
-tabContainer.Size = UDim2.new(1, -100, 1, 0)
-tabContainer.Position = UDim2.new(0, 95, 0, 0)
+tabContainer.Size = UDim2.new(1, -90, 1, 0)
+tabContainer.Position = UDim2.new(0, 85, 0, 0)
 tabContainer.BackgroundTransparency = 1
 tabContainer.Parent = topBar
 
 local tabLayout = Instance.new("UIListLayout")
 tabLayout.FillDirection = Enum.FillDirection.Horizontal
 tabLayout.SortOrder = Enum.SortOrder.LayoutOrder
-tabLayout.Padding = UDim.new(0, 4)
+tabLayout.Padding = UDim.new(0, 2)
 tabLayout.VerticalAlignment = Enum.VerticalAlignment.Center
 tabLayout.Parent = tabContainer
 
 local function createTabButton(name)
     local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(0, 46, 0, 24)
-    btn.BackgroundColor3 = Color3.fromRGB(42, 42, 42)
-    btn.TextColor3 = Color3.fromRGB(160, 160, 160)
-    btn.TextSize = 12
+    btn.Size = UDim2.new(0, 52, 0, 24) -- slightly adjusted tab widths to fit 7 tabs evenly within the wider frame
+    btn.BackgroundColor3 = ThemeColors.ButtonBackground
+    btn.TextColor3 = ThemeColors.TextSecondary
+    btn.TextSize = 10
     btn.Font = MAIN_FONT
     btn.Text = string.upper(name)
     btn.Parent = tabContainer
     applyCorner(btn, 4)
+    table.insert(themeElementsTracker.Buttons, btn)
+    table.insert(themeElementsTracker.Texts, btn)
 
     local container = Instance.new("ScrollingFrame")
     container.Size = UDim2.new(1, -12, 1, -48)
@@ -138,12 +166,12 @@ local function createTabButton(name)
         end
         for _, b in ipairs(tabContainer:GetChildren()) do
             if b:IsA("TextButton") then
-                b.BackgroundColor3 = Color3.fromRGB(42, 42, 42)
-                b.TextColor3 = Color3.fromRGB(160, 160, 160)
+                b.BackgroundColor3 = ThemeColors.ButtonBackground
+                b.TextColor3 = ThemeColors.TextSecondary
             end
         end
-        btn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-        btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+        btn.BackgroundColor3 = ThemeColors.ButtonHover
+        btn.TextColor3 = ThemeColors.TextPrimary
         container.Visible = true
     end)
 
@@ -152,34 +180,37 @@ end
 
 local visualsContainer = createTabButton("Visuals")
 visualsContainer.Visible = true
+local inventoryTabContainer = createTabButton("InvView")
 local aimbotContainer = createTabButton("Aimbot")
 local silentContainer = createTabButton("Silent")
 local modsContainer = createTabButton("Mods")
 local configContainer = createTabButton("Config")
+local themesContainer = createTabButton("Themes") -- New Themes Tab
 
 for _, b in ipairs(tabContainer:GetChildren()) do
     if b:IsA("TextButton") and b.Text == "VISUALS" then
-        b.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-        b.TextColor3 = Color3.fromRGB(255, 255, 255)
+        b.BackgroundColor3 = ThemeColors.ButtonHover
+        b.TextColor3 = ThemeColors.TextPrimary
     end
 end
 
 local function createToggleUI(parent, name, defaultState, callback)
     local btn = Instance.new("TextButton")
     btn.Size = UDim2.new(1, -8, 0, 28)
-    btn.BackgroundColor3 = defaultState and Color3.fromRGB(35, 110, 50) or Color3.fromRGB(110, 35, 35)
-    btn.TextColor3 = Color3.fromRGB(240, 240, 240)
+    btn.BackgroundColor3 = defaultState and ThemeColors.EnabledColor or ThemeColors.DisabledColor
+    btn.TextColor3 = ThemeColors.TextPrimary
     btn.TextSize = 12
     btn.Font = MAIN_FONT
     btn.Text = string.upper(name) .. ": " .. (defaultState and "ON" or "OFF")
     btn.Parent = parent
     applyCorner(btn, 4)
+    table.insert(themeElementsTracker.Texts, btn)
 
     local state = defaultState
     local updateState = function(newState, fireCallback)
         state = newState
         btn.Text = string.upper(name) .. ": " .. (state and "ON" or "OFF")
-        btn.BackgroundColor3 = state and Color3.fromRGB(35, 110, 50) or Color3.fromRGB(110, 35, 35)
+        btn.BackgroundColor3 = state and ThemeColors.EnabledColor or ThemeColors.DisabledColor
         if fireCallback then
             callback(state)
         end
@@ -189,19 +220,22 @@ local function createToggleUI(parent, name, defaultState, callback)
         updateState(not state, true)
     end)
 
+    table.insert(themeElementsTracker.Toggles, {Button = btn, GetState = function() return state end})
     return btn, updateState
 end
 
 local function createButtonUI(parent, name, callback)
     local btn = Instance.new("TextButton")
     btn.Size = UDim2.new(1, -8, 0, 28)
-    btn.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-    btn.TextColor3 = Color3.fromRGB(240, 240, 240)
+    btn.BackgroundColor3 = ThemeColors.ButtonBackground
+    btn.TextColor3 = ThemeColors.TextPrimary
     btn.TextSize = 12
     btn.Font = MAIN_FONT
     btn.Text = string.upper(name)
     btn.Parent = parent
     applyCorner(btn, 4)
+    table.insert(themeElementsTracker.Buttons, btn)
+    table.insert(themeElementsTracker.Texts, btn)
 
     btn.MouseButton1Click:Connect(function()
         callback()
@@ -219,13 +253,15 @@ local function createDropdownUI(parent, name, options, initialVal, callback)
 
     local mainBtn = Instance.new("TextButton")
     mainBtn.Size = UDim2.new(1, 0, 0, 28)
-    mainBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-    mainBtn.TextColor3 = Color3.fromRGB(240, 240, 240)
+    mainBtn.BackgroundColor3 = ThemeColors.ButtonBackground
+    mainBtn.TextColor3 = ThemeColors.TextPrimary
     mainBtn.TextSize = 12
     mainBtn.Font = MAIN_FONT
     mainBtn.Text = string.upper(name) .. ": " .. tostring(initialVal)
     mainBtn.Parent = container
     applyCorner(mainBtn, 4)
+    table.insert(themeElementsTracker.Buttons, mainBtn)
+    table.insert(themeElementsTracker.Texts, mainBtn)
 
     local listFrame = Instance.new("Frame")
     listFrame.Size = UDim2.new(1, 0, 0, 0)
@@ -298,33 +334,36 @@ end
 local function createSliderUI(parent, name, min, max, step, defaultVal, callback)
     local container = Instance.new("Frame")
     container.Size = UDim2.new(1, -8, 0, 42)
-    container.BackgroundColor3 = Color3.fromRGB(32, 32, 32)
+    container.BackgroundColor3 = ThemeColors.TopBar
     container.BorderSizePixel = 0
     container.Parent = parent
     applyCorner(container, 4)
+    table.insert(themeElementsTracker.TopBars, container)
 
     local label = Instance.new("TextLabel")
     label.Size = UDim2.new(1, 0, 0, 20)
     label.Position = UDim2.new(0, 6, 0, 0)
     label.BackgroundTransparency = 1
-    label.TextColor3 = Color3.fromRGB(240, 240, 240)
+    label.TextColor3 = ThemeColors.TextPrimary
     label.TextSize = 11
     label.Font = MAIN_FONT
     label.TextXAlignment = Enum.TextXAlignment.Left
     label.Text = string.upper(name) .. ": " .. tostring(defaultVal)
     label.Parent = container
+    table.insert(themeElementsTracker.Texts, label)
 
     local sliderBar = Instance.new("Frame")
     sliderBar.Size = UDim2.new(1, -12, 0, 8)
     sliderBar.Position = UDim2.new(0, 6, 0, 25)
-    sliderBar.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    sliderBar.BackgroundColor3 = ThemeColors.SliderBackground
     sliderBar.BorderSizePixel = 0
     sliderBar.Parent = container
     applyCorner(sliderBar, 3)
+    table.insert(themeElementsTracker.Sliders, sliderBar)
 
     local fill = Instance.new("Frame")
     fill.Size = UDim2.new((defaultVal - min) / (max - min), 0, 1, 0)
-    fill.BackgroundColor3 = Color3.fromRGB(35, 110, 50)
+    fill.BackgroundColor3 = ThemeColors.EnabledColor
     fill.BorderSizePixel = 0
     fill.Parent = sliderBar
     applyCorner(fill, 3)
@@ -373,13 +412,15 @@ end
 local function createKeybindUI(parent, name, defaultKey, callback)
     local btn = Instance.new("TextButton")
     btn.Size = UDim2.new(1, -8, 0, 28)
-    btn.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-    btn.TextColor3 = Color3.fromRGB(240, 240, 240)
+    btn.BackgroundColor3 = ThemeColors.ButtonBackground
+    btn.TextColor3 = ThemeColors.TextPrimary
     btn.TextSize = 12
     btn.Font = MAIN_FONT
     btn.Text = string.upper(name) .. ": [" .. defaultKey.Name .. "]"
     btn.Parent = parent
     applyCorner(btn, 4)
+    table.insert(themeElementsTracker.Buttons, btn)
+    table.insert(themeElementsTracker.Texts, btn)
 
     local currentKey = defaultKey
     local binding = false
@@ -410,6 +451,128 @@ local function createKeybindUI(parent, name, defaultKey, callback)
     return btn, updateKey
 end
 
+-- Function to Update Theme Dynamically Across the UI
+local function refreshTheme()
+    for _, f in ipairs(themeElementsTracker.MainBackgrounds) do
+        if f and f.Parent then f.BackgroundColor3 = ThemeColors.MainBackground end
+    end
+    for _, f in ipairs(themeElementsTracker.TopBars) do
+        if f and f.Parent then f.BackgroundColor3 = ThemeColors.TopBar end
+    end
+    for _, b in ipairs(themeElementsTracker.Buttons) do
+        if b and b.Parent then b.BackgroundColor3 = ThemeColors.ButtonBackground end
+    end
+    for _, t in ipairs(themeElementsTracker.Texts) do
+        if t and t.Parent then t.TextColor3 = ThemeColors.TextPrimary end
+    end
+    for _, s in ipairs(themeElementsTracker.Sliders) do
+        if s and s.Parent then s.BackgroundColor3 = ThemeColors.SliderBackground end
+    end
+    for _, toggleInfo in ipairs(themeElementsTracker.Toggles) do
+        if toggleInfo.Button and toggleInfo.Button.Parent then
+            local state = toggleInfo.GetState()
+            toggleInfo.Button.BackgroundColor3 = state and ThemeColors.EnabledColor or ThemeColors.DisabledColor
+        end
+    end
+end
+
+-- Overhauled Theme Customization Menu inside the "Themes" Tab
+local function createColorPickerRow(parent, labelName, currentColor, onColorChanged)
+    local container = Instance.new("Frame")
+    container.Size = UDim2.new(1, -8, 0, 32)
+    container.BackgroundColor3 = ThemeColors.TopBar
+    container.BorderSizePixel = 0
+    container.Parent = parent
+    applyCorner(container, 4)
+    table.insert(themeElementsTracker.TopBars, container)
+
+    local lbl = Instance.new("TextLabel")
+    lbl.Size = UDim2.new(0, 140, 1, 0)
+    lbl.Position = UDim2.new(0, 8, 0, 0)
+    lbl.BackgroundTransparency = 1
+    lbl.TextColor3 = ThemeColors.TextPrimary
+    lbl.TextSize = 12
+    lbl.Font = MAIN_FONT
+    lbl.TextXAlignment = Enum.TextXAlignment.Left
+    lbl.Text = string.upper(labelName)
+    lbl.Parent = container
+    table.insert(themeElementsTracker.Texts, lbl)
+
+    local function createColorInput(defaultVal, posX, nameLabel, callback)
+        local box = Instance.new("TextBox")
+        box.Size = UDim2.new(0, 42, 0, 20)
+        box.Position = UDim2.new(0, posX, 0, 6)
+        box.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+        box.TextColor3 = ThemeColors.TextPrimary
+        box.TextSize = 11
+        box.Font = MAIN_FONT
+        box.Text = tostring(math.floor(defaultVal * 255))
+        box.Parent = container
+        applyCorner(box, 3)
+        table.insert(themeElementsTracker.Texts, box)
+
+        box.FocusLost:Connect(function()
+            local num = tonumber(box.Text)
+            if num then
+                num = math.clamp(num, 0, 255)
+                box.Text = tostring(num)
+                callback(num / 255)
+            else
+                box.Text = tostring(math.floor(defaultVal * 255))
+            end
+        end)
+    end
+
+    local rVal, gVal, bVal = currentColor.R, currentColor.G, currentColor.B
+
+    createColorInput(rVal, 160, "R", function(newR)
+        rVal = newR
+        local updated = Color3.new(rVal, gVal, bVal)
+        onColorChanged(updated)
+        refreshTheme()
+    end)
+
+    createColorInput(gVal, 210, "G", function(newG)
+        gVal = newG
+        local updated = Color3.new(rVal, gVal, bVal)
+        onColorChanged(updated)
+        refreshTheme()
+    end)
+
+    createColorInput(bVal, 260, "B", function(newB)
+        bVal = newB
+        local updated = Color3.new(rVal, gVal, bVal)
+        onColorChanged(updated)
+        refreshTheme()
+    end)
+
+    return container
+end
+
+-- Populate Themes Tab Controls
+createColorPickerRow(themesContainer, "Main Background", ThemeColors.MainBackground, function(c) ThemeColors.MainBackground = c end)
+createColorPickerRow(themesContainer, "Top Bar", ThemeColors.TopBar, function(c) ThemeColors.TopBar = c end)
+createColorPickerRow(themesContainer, "Button Background", ThemeColors.ButtonBackground, function(c) ThemeColors.ButtonBackground = c end)
+createColorPickerRow(themesContainer, "Button Hover / Active", ThemeColors.ButtonHover, function(c) ThemeColors.ButtonHover = c end)
+createColorPickerRow(themesContainer, "Primary Text", ThemeColors.TextPrimary, function(c) ThemeColors.TextPrimary = c end)
+createColorPickerRow(themesContainer, "Secondary Text", ThemeColors.TextSecondary, function(c) ThemeColors.TextSecondary = c end)
+createColorPickerRow(themesContainer, "Enabled Toggle", ThemeColors.EnabledColor, function(c) ThemeColors.EnabledColor = c end)
+createColorPickerRow(themesContainer, "Disabled Toggle", ThemeColors.DisabledColor, function(c) ThemeColors.DisabledColor = c end)
+
+createButtonUI(themesContainer, "Reset Theme Defaults", function()
+    ThemeColors.MainBackground = Color3.fromRGB(22, 22, 22)
+    ThemeColors.TopBar = Color3.fromRGB(32, 32, 32)
+    ThemeColors.ButtonBackground = Color3.fromRGB(45, 45, 45)
+    ThemeColors.ButtonHover = Color3.fromRGB(60, 60, 60)
+    ThemeColors.TextPrimary = Color3.fromRGB(240, 240, 240)
+    ThemeColors.TextSecondary = Color3.fromRGB(160, 160, 160)
+    ThemeColors.EnabledColor = Color3.fromRGB(35, 110, 50)
+    ThemeColors.DisabledColor = Color3.fromRGB(110, 35, 35)
+    ThemeColors.SliderBackground = Color3.fromRGB(50, 50, 50)
+    refreshTheme()
+end)
+
+-- [Rest of existing inventory window, aimbot, esp, and config code continues identically...]
 local invWindow = Instance.new("Frame")
 invWindow.Size = UDim2.new(0, 680, 0, 480)
 invWindow.Position = UDim2.new(0.5, -340, 0.5, -240)
@@ -593,15 +756,11 @@ local function getItemAttachmentsInfo(itemObj)
 end
 
 local function shouldWarnItem(itemName, sightName)
-    if itemName == "FlareGun" then
-        return true
-    end
-    if itemName == "HSPV" then
-        return true
-    end
-    if sightName == "Reapir" then
-        return true
-    end
+    if itemName == "FlareGun" then return true end
+    if itemName == "HSPV" then return true end
+    if itemName == "R700" then return true end
+    if itemName == "TFZ98S" then return true end
+    if sightName == "Reapir" then return true end
     return false
 end
 
@@ -611,30 +770,24 @@ local function checkPlayerHasWarnedItem(playerName)
     local pFolder = repPlayers:FindFirstChild(playerName)
     if not pFolder then return false end
     local invFolder = pFolder:FindFirstChild("Inventory")
-    if not invFolder then return end
+    if not invFolder then return false end
 
     local function scanItem(itemObj)
         local itemName = itemObj.Name
         local sightName, _ = getItemAttachmentsInfo(itemObj)
-        if shouldWarnItem(itemName, sightName) then
-            return true
-        end
+        if shouldWarnItem(itemName, sightName) then return true end
 
         local nestedInv = itemObj:FindFirstChild("Inventory")
         if nestedInv then
             for _, subItem in ipairs(nestedInv:GetChildren()) do
-                if scanItem(subItem) then
-                    return true
-                end
+                if scanItem(subItem) then return true end
             end
         end
         return false
     end
 
     for _, item in ipairs(invFolder:GetChildren()) do
-        if scanItem(item) then
-            return true
-        end
+        if scanItem(item) then return true end
     end
     return false
 end
@@ -791,6 +944,7 @@ end
 
 local function getPlayerNamesList()
     local list = {}
+    local repPlayers = ReplicatedStorage:FindFirstChild("Players")
     for _, p in ipairs(Players:GetPlayers()) do
         local hasWarned = checkPlayerHasWarnedItem(p.Name)
         table.insert(list, {Name = p.Name, Highlight = hasWarned})
@@ -798,18 +952,18 @@ local function getPlayerNamesList()
     return list
 end
 
-local _, _, updateInvPlayerDropdown = createDropdownUI(visualsContainer, "Select Player", getPlayerNamesList(), selectedTargetPlayer, function(val)
+local _, _, updateInvPlayerDropdown = createDropdownUI(inventoryTabContainer, "Select Player", getPlayerNamesList(), selectedTargetPlayer, function(val)
     selectedTargetPlayer = val
     if inventoryViewerEnabled then
         refreshInventoryDisplay()
     end
 end)
 
-createButtonUI(visualsContainer, "Refresh Player List", function()
+createButtonUI(inventoryTabContainer, "Refresh Player List", function()
     updateInvPlayerDropdown(getPlayerNamesList())
 end)
 
-local _, setInvViewerUI = createToggleUI(visualsContainer, "Inventory Viewer", false, function(val)
+local _, setInvViewerUI = createToggleUI(inventoryTabContainer, "Inventory Viewer", false, function(val)
     inventoryViewerEnabled = val
     invWindow.Visible = val
     inventoryLoopToken = inventoryLoopToken + 1
@@ -831,18 +985,13 @@ end)
 local aimbotInvViewerEnabled = false
 local aimbotInvKey = Enum.KeyCode.H
 
-local _, setAimbotInvViewerUI = createToggleUI(visualsContainer, "Aimbot Inventory Viewer", false, function(val)
+local _, setAimbotInvViewerUI = createToggleUI(inventoryTabContainer, "Aimbot Inv Viewer", false, function(val)
     aimbotInvViewerEnabled = val
 end)
 
-createKeybindUI(visualsContainer, "Aimbot Inv Key", aimbotInvKey, function(key)
+createKeybindUI(inventoryTabContainer, "Aimbot Inv Key", aimbotInvKey, function(key)
     aimbotInvKey = key
 end)
-
-local visualSpacer = Instance.new("Frame")
-visualSpacer.Size = UDim2.new(1, -8, 0, 10)
-visualSpacer.BackgroundTransparency = 1
-visualSpacer.Parent = visualsContainer
 
 local playerESPEnabled = true
 local gearESPEnabled = false
@@ -1039,9 +1188,7 @@ local function isVisible(targetPart, modelOrChar)
         local success, result = pcall(function()
             return Workspace:Raycast(currentOrigin, (destination - currentOrigin).Unit * (destination - currentOrigin).Magnitude, raycastParams)
         end)
-        if not success or not result then
-            return true
-        end
+        if not success or not result then return true end
         
         local hitPart = result.Instance
         if hitPart then
@@ -1053,9 +1200,7 @@ local function isVisible(targetPart, modelOrChar)
                 table.insert(filterList, hitPart)
                 raycastParams.FilterDescendantsInstances = filterList
                 currentOrigin = result.Position + ((destination - currentOrigin).Unit * 0.1)
-                if (currentOrigin - destination).Magnitude < 0.1 then
-                    return true
-                end
+                if (currentOrigin - destination).Magnitude < 0.1 then return true end
             else
                 return false
             end
@@ -1090,11 +1235,8 @@ local setSilentAimUI = nil
 
 local function getPlayerNameFromTarget(target)
     if not target then return nil end
-    if target:IsA("Player") then
-        return target.Name
-    elseif target:IsA("Model") then
-        return target.Name
-    end
+    if target:IsA("Player") then return target.Name
+    elseif target:IsA("Model") then return target.Name end
     return nil
 end
 
@@ -1112,27 +1254,16 @@ local function isTeammate(target)
 
     for _, clanFolder in ipairs(clansFolder:GetChildren()) do
         local ownerName = clanFolder.Name:gsub("'s team$", "")
-        if ownerName == localPlayerName then
-            localTeamFolder = clanFolder
-        end
-        if ownerName == targetName then
-            targetTeamFolder = clanFolder
-        end
+        if ownerName == localPlayerName then localTeamFolder = clanFolder end
+        if ownerName == targetName then targetTeamFolder = clanFolder end
 
         for _, member in ipairs(clanFolder:GetChildren()) do
-            if member.Name == localPlayerName then
-                localTeamFolder = clanFolder
-            end
-            if member.Name == targetName then
-                targetTeamFolder = clanFolder
-            end
+            if member.Name == localPlayerName then localTeamFolder = clanFolder end
+            if member.Name == targetName then targetTeamFolder = clanFolder end
         end
     end
 
-    if localTeamFolder and targetTeamFolder and localTeamFolder == targetTeamFolder then
-        return true
-    end
-
+    if localTeamFolder and targetTeamFolder and localTeamFolder == targetTeamFolder then return true end
     return false
 end
 
@@ -1291,27 +1422,16 @@ local function isSilentTeammate(target)
 
     for _, clanFolder in ipairs(clansFolder:GetChildren()) do
         local ownerName = clanFolder.Name:gsub("'s team$", "")
-        if ownerName == localPlayerName then
-            localTeamFolder = clanFolder
-        end
-        if ownerName == targetName then
-            targetTeamFolder = clanFolder
-        end
+        if ownerName == localPlayerName then localTeamFolder = clanFolder end
+        if ownerName == targetName then targetTeamFolder = clanFolder end
 
         for _, member in ipairs(clanFolder:GetChildren()) do
-            if member.Name == localPlayerName then
-                localTeamFolder = clanFolder
-            end
-            if member.Name == targetName then
-                targetTeamFolder = clanFolder
-            end
+            if member.Name == localPlayerName then localTeamFolder = clanFolder end
+            if member.Name == targetName then targetTeamFolder = clanFolder end
         end
     end
 
-    if localTeamFolder and targetTeamFolder and localTeamFolder == targetTeamFolder then
-        return true
-    end
-
+    if localTeamFolder and targetTeamFolder and localTeamFolder == targetTeamFolder then return true end
     return false
 end
 
@@ -1378,9 +1498,7 @@ local function getClosestSilentCharacter()
         end
     end
 
-    table.sort(candidates, function(a, b)
-        return a.dist < b.dist
-    end)
+    table.sort(candidates, function(a, b) return a.dist < b.dist end)
 
     for _, candidate in ipairs(candidates) do
         for _, part in ipairs(candidate.parts) do
@@ -1406,9 +1524,7 @@ RunService.RenderStepped:Connect(function()
         isSilentTargetActive = false
         activeSilentTargetHead = nil
         if isTriggerbotHolding then
-            pcall(function()
-                VirtualUser:Button1Up(Vector2.new(0,0))
-            end)
+            pcall(function() VirtualUser:Button1Up(Vector2.new(0,0)) end)
             isTriggerbotHolding = false
         end
         return
@@ -1435,9 +1551,7 @@ RunService.RenderStepped:Connect(function()
                 local currentTime = os.clock()
                 local canShoot = true
                 if not rapidFireEnabled then
-                    if currentTime - lastTriggerbotTime < 0.25 then
-                        canShoot = false
-                    end
+                    if currentTime - lastTriggerbotTime < 0.25 then canShoot = false end
                 end
 
                 if canShoot then
@@ -1454,9 +1568,7 @@ RunService.RenderStepped:Connect(function()
 
                     if canShoot then
                         if not isTriggerbotHolding then
-                            pcall(function()
-                                VirtualUser:Button1Down(Vector2.new(0,0))
-                            end)
+                            pcall(function() VirtualUser:Button1Down(Vector2.new(0,0)) end)
                             isTriggerbotHolding = true
                             lastTriggerbotTime = currentTime
                         end
@@ -1464,9 +1576,7 @@ RunService.RenderStepped:Connect(function()
                 end
             else
                 if isTriggerbotHolding then
-                    pcall(function()
-                        VirtualUser:Button1Up(Vector2.new(0,0))
-                    end)
+                    pcall(function() VirtualUser:Button1Up(Vector2.new(0,0)) end)
                     isTriggerbotHolding = false
                 end
                 triggerbotShotCount = 0
@@ -1476,9 +1586,7 @@ RunService.RenderStepped:Connect(function()
         activeSilentTargetHead = nil
         isSilentTargetActive = false
         if isTriggerbotHolding then
-            pcall(function()
-                VirtualUser:Button1Up(Vector2.new(0,0))
-            end)
+            pcall(function() VirtualUser:Button1Up(Vector2.new(0,0)) end)
             isTriggerbotHolding = false
         end
         triggerbotShotCount = 0
@@ -1548,9 +1656,7 @@ RunService.RenderStepped:Connect(function()
                     local isInsideSilentFOV = false
                     if SilentAimEnabled then
                         local distToMouse = (Vector2.new(screenPos.X, screenPos.Y) - mousePos).Magnitude
-                        if distToMouse <= SilentFOVRadius then
-                            isInsideSilentFOV = true
-                        end
+                        if distToMouse <= SilentFOVRadius then isInsideSilentFOV = true end
                     end
 
                     local visible = false
@@ -1558,17 +1664,13 @@ RunService.RenderStepped:Connect(function()
                         visible = isVisible(head, char)
                     elseif isInsideSilentFOV and SilentAimEnabled then
                         visible = isVisible(head, char)
-                        if visible then
-                            fovGreenTriggered = true
-                        end
+                        if visible then fovGreenTriggered = true end
                     end
 
                     local espColor = visible and Color3.new(0, 1, 0) or Color3.new(1, 1, 1)
 
                     drawings.Text.Color = espColor
-                    for _, bone in ipairs(drawings.Bones) do
-                        bone.line.Color = espColor
-                    end
+                    for _, bone in ipairs(drawings.Bones) do bone.line.Color = espColor end
 
                     local gearInfo = getPlayerGearInfo(char)
                     drawings.Text.Text = string.format("%s [%.0fm]%s", player.Name, distance, gearInfo)
@@ -1618,9 +1720,7 @@ RunService.RenderStepped:Connect(function()
                     local isInsideSilentFOV = false
                     if SilentAimEnabled then
                         local distToMouse = (Vector2.new(screenPos.X, screenPos.Y) - mousePos).Magnitude
-                        if distToMouse <= SilentFOVRadius then
-                            isInsideSilentFOV = true
-                        end
+                        if distToMouse <= SilentFOVRadius then isInsideSilentFOV = true end
                     end
 
                     local visible = false
@@ -1628,17 +1728,13 @@ RunService.RenderStepped:Connect(function()
                         visible = isVisible(head, model)
                     elseif isInsideSilentFOV and SilentAimEnabled then
                         visible = isVisible(head, model)
-                        if visible then
-                            fovGreenTriggered = true
-                        end
+                        if visible then fovGreenTriggered = true end
                     end
 
                     local espColor = visible and Color3.new(0, 1, 0) or Color3.new(1, 0.5, 0)
 
                     drawings.Text.Color = espColor
-                    for _, bone in ipairs(drawings.Bones) do
-                        bone.line.Color = espColor
-                    end
+                    for _, bone in ipairs(drawings.Bones) do bone.line.Color = espColor end
 
                     drawings.Text.Text = string.format("%s [%.0fm]", model.Name, distance)
                     drawings.Text.Center = true
@@ -1765,9 +1861,7 @@ end)
 local _, setFullbright = createToggleUI(visualsContainer, "Fullbright", fullbrightEnabled, function(val)
     fullbrightEnabled = val
     if val then
-        if brightLoop then
-            brightLoop:Disconnect()
-        end
+        if brightLoop then brightLoop:Disconnect() end
         local function brightFunc()
             Lighting.Brightness = 2
             Lighting.ClockTime = 14
@@ -1780,6 +1874,35 @@ local _, setFullbright = createToggleUI(visualsContainer, "Fullbright", fullbrig
         if brightLoop then
             brightLoop:Disconnect()
             brightLoop = nil
+        end
+    end
+end)
+
+createButtonUI(visualsContainer, "Bring Agents to Vault", function()
+    local paths = {
+        Workspace:WaitForChild("Anna", 5),
+        Workspace:WaitForChild("Nurse", 5),
+        Workspace:WaitForChild("Mihkel", 5),
+        Workspace:WaitForChild("Blaze", 5),
+        Workspace:WaitForChild("Tarmo", 5),
+        Workspace:WaitForChild("Boss", 5)
+    }
+
+    local spacing = 5
+    local targetX = -155
+    local targetZ = -427
+
+    for i, model in ipairs(paths) do
+        if model and model:IsA("Model") then
+            local primaryPart = model.PrimaryPart or model:FindFirstChildWhichIsA("BasePart")
+            if primaryPart then
+                local currentCF = primaryPart.CFrame
+                local originalY = currentCF.Position.Y
+                local newZ = targetZ + ((i - 1) * spacing)
+                
+                local targetCF = CFrame.new(targetX, originalY, newZ) * CFrame.Angles(0, math.rad(270), 0)
+                model:PivotTo(targetCF)
+            end
         end
     end
 end)
@@ -1875,9 +1998,7 @@ _, setAimbotMasterUI = createToggleUI(aimbotContainer, "Aimbot", AimbotMasterEna
     if AimbotMasterEnabled then
         if SilentAimEnabled then
             SilentAimEnabled = false
-            if setSilentAimUI then
-                setSilentAimUI(false, false)
-            end
+            if setSilentAimUI then setSilentAimUI(false, false) end
         end
     else
         AimbotEnabled = false
@@ -1887,16 +2008,12 @@ end)
 
 local _, setAimNpc = createToggleUI(aimbotContainer, "Aim NPCs", aimNpcEnabled, function(val)
     aimNpcEnabled = val
-    if not val and currentTarget and currentTarget:IsA("Model") then
-        ResetTarget()
-    end
+    if not val and currentTarget and currentTarget:IsA("Model") then ResetTarget() end
 end)
 
 local _, setTeamCheck = createToggleUI(aimbotContainer, "Team Check", teamCheckEnabled, function(val)
     teamCheckEnabled = val
-    if val and currentTarget and isTeammate(currentTarget) then
-        ResetTarget()
-    end
+    if val and currentTarget and isTeammate(currentTarget) then ResetTarget() end
 end)
 
 local _, setToggleKey = createKeybindUI(aimbotContainer, "Aimbot Key", toggleKey, function(key)
@@ -1920,64 +2037,31 @@ _, setSilentAimUI = createToggleUI(silentContainer, "Silent Aim", SilentAimEnabl
     if SilentAimEnabled then
         AimbotEnabled = false
         ResetTarget()
-        if setAimbotMasterUI then
-            setAimbotMasterUI(false, false)
-        end
+        if setAimbotMasterUI then setAimbotMasterUI(false, false) end
     else
         if isTriggerbotHolding then
-            pcall(function()
-                VirtualUser:Button1Up(Vector2.new(0,0))
-            end)
+            pcall(function() VirtualUser:Button1Up(Vector2.new(0,0)) end)
             isTriggerbotHolding = false
         end
     end
 end)
 
-createToggleUI(silentContainer, "Team Check", silentTeamCheckEnabled, function(val)
-    silentTeamCheckEnabled = val
-end)
-
-createToggleUI(silentContainer, "FOV Circle", CircleVisible, function(val)
-    CircleVisible = val
-end)
-
+createToggleUI(silentContainer, "Team Check", silentTeamCheckEnabled, function(val) silentTeamCheckEnabled = val end)
+createToggleUI(silentContainer, "FOV Circle", CircleVisible, function(val) CircleVisible = val end)
 createToggleUI(silentContainer, "Triggerbot", TriggerbotEnabled, function(val)
     TriggerbotEnabled = val
     if not val and isTriggerbotHolding then
-        pcall(function()
-            VirtualUser:Button1Up(Vector2.new(0,0))
-        end)
+        pcall(function() VirtualUser:Button1Up(Vector2.new(0,0)) end)
         isTriggerbotHolding = false
     end
 end)
-
-createSliderUI(silentContainer, "Burst Limit", 0, 15, 1, TriggerbotBurstLimit, function(val)
-    TriggerbotBurstLimit = val
-end)
-
-createToggleUI(silentContainer, "Target NPCs", TargetNpcs_S, function(val)
-    TargetNpcs_S = val
-end)
-
-createToggleUI(silentContainer, "Target Head", TargetHead_S, function(val)
-    TargetHead_S = val
-end)
-
-createToggleUI(silentContainer, "Target UpperTorso", TargetUpperTorso_S, function(val)
-    TargetUpperTorso_S = val
-end)
-
-createToggleUI(silentContainer, "Target LowerTorso", TargetLowerTorso_S, function(val)
-    TargetLowerTorso_S = val
-end)
-
-createSliderUI(silentContainer, "FOV Radius", 20, 400, 5, SilentFOVRadius, function(val)
-    SilentFOVRadius = val
-end)
-
-createSliderUI(silentContainer, "Hit Chance", 10, 100, 5, SilentHitChance, function(val)
-    SilentHitChance = val
-end)
+createSliderUI(silentContainer, "Burst Limit", 0, 15, 1, TriggerbotBurstLimit, function(val) TriggerbotBurstLimit = val end)
+createToggleUI(silentContainer, "Target NPCs", TargetNpcs_S, function(val) TargetNpcs_S = val end)
+createToggleUI(silentContainer, "Target Head", TargetHead_S, function(val) TargetHead_S = val end)
+createToggleUI(silentContainer, "Target UpperTorso", TargetUpperTorso_S, function(val) TargetUpperTorso_S = val end)
+createToggleUI(silentContainer, "Target LowerTorso", TargetLowerTorso_S, function(val) TargetLowerTorso_S = val end)
+createSliderUI(silentContainer, "FOV Radius", 20, 400, 5, SilentFOVRadius, function(val) SilentFOVRadius = val end)
+createSliderUI(silentContainer, "Hit Chance", 10, 100, 5, SilentHitChance, function(val) SilentHitChance = val end)
 
 local _, setNoRecoil = createToggleUI(modsContainer, "No Recoil", noRecoilEnabled, function(val)
     noRecoilEnabled = val
@@ -1994,9 +2078,7 @@ local _, setNoRecoil = createToggleUI(modsContainer, "No Recoil", noRecoilEnable
         end
     else
         for desc, origVal in pairs(originalRecoilValues) do
-            if desc and desc.Parent then
-                desc.Value = origVal
-            end
+            if desc and desc.Parent then desc.Value = origVal end
         end
         originalRecoilValues = {}
     end
@@ -2010,9 +2092,7 @@ local _, setRapidFire = createToggleUI(modsContainer, "Rapid Fire", rapidFireEna
                 if original.FireMode ~= nil then tbl.FireMode = original.FireMode end
                 if original.FireModes ~= nil then
                     tbl.FireModes = {}
-                    for idx, mode in ipairs(original.FireModes) do
-                        tbl.FireModes[idx] = mode
-                    end
+                    for idx, mode in ipairs(original.FireModes) do tbl.FireModes[idx] = mode end
                 end
                 if original.Rate ~= nil then tbl.FireRate = original.FireRate end
                 if original.CycleTiming ~= nil then tbl.CycleTiming = original.CycleTiming end
@@ -2023,7 +2103,6 @@ local _, setRapidFire = createToggleUI(modsContainer, "Rapid Fire", rapidFireEna
 end)
 
 local originalAmmoDropValues = {}
-
 local _, setNoBulletDrop = createToggleUI(modsContainer, "No Bullet Drop", noBulletDropEnabled, function(val)
     noBulletDropEnabled = val
     local ammoTypes = ReplicatedStorage:FindFirstChild("AmmoTypes")
@@ -2034,16 +2113,12 @@ local _, setNoBulletDrop = createToggleUI(modsContainer, "No Bullet Drop", noBul
         for _, ammo in ipairs(ammoTypes:GetChildren()) do
             if ammo:IsA("Instance") then
                 originalAmmoDropValues[ammo] = ammo:GetAttribute("ProjectileDrop")
-                if ammo:GetAttribute("ProjectileDrop") ~= nil then
-                    ammo:SetAttribute("ProjectileDrop", 0)
-                end
+                if ammo:GetAttribute("ProjectileDrop") ~= nil then ammo:SetAttribute("ProjectileDrop", 0) end
             end
         end
     else
         for ammo, origDrop in pairs(originalAmmoDropValues) do
-            if ammo and ammo.Parent and origDrop ~= nil then
-                ammo:SetAttribute("ProjectileDrop", origDrop)
-            end
+            if ammo and ammo.Parent and origDrop ~= nil then ammo:SetAttribute("ProjectileDrop", origDrop) end
         end
         originalAmmoDropValues = {}
     end
@@ -2056,20 +2131,20 @@ end)
 local HttpService = game:GetService("HttpService")
 local folderName = "FurHubConfigs"
 
-if not isfolder(folderName) then
-    makefolder(folderName)
-end
+if not isfolder(folderName) then makefolder(folderName) end
 
 local configNameBox = Instance.new("TextBox")
 configNameBox.Size = UDim2.new(1, -8, 0, 28)
-configNameBox.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-configNameBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+configNameBox.BackgroundColor3 = ThemeColors.ButtonBackground
+configNameBox.TextColor3 = ThemeColors.TextPrimary
 configNameBox.TextSize = 12
 configNameBox.Font = MAIN_FONT
 configNameBox.PlaceholderText = "ENTER CONFIG NAME..."
 configNameBox.Text = ""
 configNameBox.Parent = configContainer
 applyCorner(configNameBox, 4)
+table.insert(themeElementsTracker.Buttons, configNameBox)
+table.insert(themeElementsTracker.Texts, configNameBox)
 
 local function getConfigsList()
     local files = listfiles(folderName)
@@ -2077,9 +2152,7 @@ local function getConfigsList()
     for _, file in ipairs(files) do
         local name = file:match("[/\\]([^/\\]+)$") or file
         name = name:gsub("%.json$", "")
-        if name ~= "" and name ~= "default" then
-            table.insert(list, name)
-        end
+        if name ~= "" and name ~= "default" then table.insert(list, name) end
     end
     return list
 end
@@ -2091,9 +2164,7 @@ local loadDropdownContainer, selectLoadOpt, updateLoadDropdown = createDropdownU
     configNameBox.Text = val
 end)
 
-if initialSelection ~= "" then
-    configNameBox.Text = initialSelection
-end
+if initialSelection ~= "" then configNameBox.Text = initialSelection end
 
 local function refreshDropdown()
     local list = getConfigsList()
@@ -2144,14 +2215,10 @@ local function loadConfigByName(cfgName)
     local path = folderName .. "/" .. cfgName .. ".json"
     if not isfile(path) then return end
 
-    local success, result = pcall(function()
-        return readfile(path)
-    end)
+    local success, result = pcall(function() return readfile(path) end)
 
     if success and result then
-        local successDec, data = pcall(function()
-            return HttpService:JSONDecode(result)
-        end)
+        local successDec, data = pcall(function() return HttpService:JSONDecode(result) end)
 
         if successDec and data then
             if data.playerESP ~= nil then setPlayerESP(data.playerESP, true) end
@@ -2196,60 +2263,56 @@ end
 local saveBtn = Instance.new("TextButton")
 saveBtn.Size = UDim2.new(1, -8, 0, 28)
 saveBtn.BackgroundColor3 = Color3.fromRGB(35, 110, 50)
-saveBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+saveBtn.TextColor3 = ThemeColors.TextPrimary
 saveBtn.TextSize = 12
 saveBtn.Font = MAIN_FONT
 saveBtn.Text = "SAVE CONFIG"
 saveBtn.Parent = configContainer
 applyCorner(saveBtn, 4)
+table.insert(themeElementsTracker.Texts, saveBtn)
 
-saveBtn.MouseButton1Click:Connect(function()
-    saveCurrentConfig()
-end)
+saveBtn.MouseButton1Click:Connect(function() saveCurrentConfig() end)
 
 local loadBtn = Instance.new("TextButton")
 loadBtn.Size = UDim2.new(1, -8, 0, 28)
 loadBtn.BackgroundColor3 = Color3.fromRGB(110, 35, 35)
-loadBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+loadBtn.TextColor3 = ThemeColors.TextPrimary
 loadBtn.TextSize = 12
 loadBtn.Font = MAIN_FONT
 loadBtn.Text = "LOAD SELECTED CONFIG"
 loadBtn.Parent = configContainer
 applyCorner(loadBtn, 4)
+table.insert(themeElementsTracker.Texts, loadBtn)
 
-loadBtn.MouseButton1Click:Connect(function()
-    loadConfigByName(configNameBox.Text)
-end)
+loadBtn.MouseButton1Click:Connect(function() loadConfigByName(configNameBox.Text) end)
 
 local resetBtn = Instance.new("TextButton")
 resetBtn.Size = UDim2.new(1, -8, 0, 28)
 resetBtn.BackgroundColor3 = Color3.fromRGB(110, 75, 35)
-resetBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+resetBtn.TextColor3 = ThemeColors.TextPrimary
 resetBtn.TextSize = 12
 resetBtn.Font = MAIN_FONT
 resetBtn.Text = "RESET TO DEFAULT"
 resetBtn.Parent = configContainer
 applyCorner(resetBtn, 4)
+table.insert(themeElementsTracker.Texts, resetBtn)
 
-resetBtn.MouseButton1Click:Connect(function()
-    resetToDefault()
-end)
+resetBtn.MouseButton1Click:Connect(function() resetToDefault() end)
 
 local removeAllBtn = Instance.new("TextButton")
 removeAllBtn.Size = UDim2.new(1, -8, 0, 28)
 removeAllBtn.BackgroundColor3 = Color3.fromRGB(140, 35, 35)
-removeAllBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+removeAllBtn.TextColor3 = ThemeColors.TextPrimary
 removeAllBtn.TextSize = 12
 removeAllBtn.Font = MAIN_FONT
 removeAllBtn.Text = "REMOVE ALL CONFIGS"
 removeAllBtn.Parent = configContainer
 applyCorner(removeAllBtn, 4)
+table.insert(themeElementsTracker.Texts, removeAllBtn)
 
 removeAllBtn.MouseButton1Click:Connect(function()
     local files = listfiles(folderName)
-    for _, file in ipairs(files) do
-        delfile(file)
-    end
+    for _, file in ipairs(files) do delfile(file) end
     refreshDropdown()
     configNameBox.Text = ""
 end)
