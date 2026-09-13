@@ -54,7 +54,7 @@ screenGui.ResetOnSpawn = false
 screenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
 
 local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0, 480, 0, 430) -- widened from 410 to 480 to accommodate the Themes tab
+mainFrame.Size = UDim2.new(0, 480, 0, 430)
 mainFrame.Position = UDim2.new(0, 50, 0, 150)
 mainFrame.BackgroundColor3 = ThemeColors.MainBackground
 mainFrame.BorderSizePixel = 0
@@ -132,7 +132,7 @@ tabLayout.Parent = tabContainer
 
 local function createTabButton(name)
     local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(0, 52, 0, 24) -- slightly adjusted tab widths to fit 7 tabs evenly within the wider frame
+    btn.Size = UDim2.new(0, 52, 0, 24)
     btn.BackgroundColor3 = ThemeColors.ButtonBackground
     btn.TextColor3 = ThemeColors.TextSecondary
     btn.TextSize = 10
@@ -185,7 +185,7 @@ local aimbotContainer = createTabButton("Aimbot")
 local silentContainer = createTabButton("Silent")
 local modsContainer = createTabButton("Mods")
 local configContainer = createTabButton("Config")
-local themesContainer = createTabButton("Themes") -- New Themes Tab
+local themesContainer = createTabButton("Themes")
 
 for _, b in ipairs(tabContainer:GetChildren()) do
     if b:IsA("TextButton") and b.Text == "VISUALS" then
@@ -451,7 +451,6 @@ local function createKeybindUI(parent, name, defaultKey, callback)
     return btn, updateKey
 end
 
--- Function to Update Theme Dynamically Across the UI
 local function refreshTheme()
     for _, f in ipairs(themeElementsTracker.MainBackgrounds) do
         if f and f.Parent then f.BackgroundColor3 = ThemeColors.MainBackground end
@@ -476,7 +475,6 @@ local function refreshTheme()
     end
 end
 
--- Overhauled Theme Customization Menu inside the "Themes" Tab
 local function createColorPickerRow(parent, labelName, currentColor, onColorChanged)
     local container = Instance.new("Frame")
     container.Size = UDim2.new(1, -8, 0, 32)
@@ -549,7 +547,6 @@ local function createColorPickerRow(parent, labelName, currentColor, onColorChan
     return container
 end
 
--- Populate Themes Tab Controls
 createColorPickerRow(themesContainer, "Main Background", ThemeColors.MainBackground, function(c) ThemeColors.MainBackground = c end)
 createColorPickerRow(themesContainer, "Top Bar", ThemeColors.TopBar, function(c) ThemeColors.TopBar = c end)
 createColorPickerRow(themesContainer, "Button Background", ThemeColors.ButtonBackground, function(c) ThemeColors.ButtonBackground = c end)
@@ -572,7 +569,6 @@ createButtonUI(themesContainer, "Reset Theme Defaults", function()
     refreshTheme()
 end)
 
--- [Rest of existing inventory window, aimbot, esp, and config code continues identically...]
 local invWindow = Instance.new("Frame")
 invWindow.Size = UDim2.new(0, 680, 0, 480)
 invWindow.Position = UDim2.new(0.5, -340, 0.5, -240)
@@ -736,6 +732,59 @@ end
 local selectedTargetPlayer = LocalPlayer.Name
 local inventoryViewerEnabled = false
 local inventoryLoopToken = 0
+
+-- Inventory Viewer Tracking Indicator (Red Box/Dot)
+local invViewerIndicator = Drawing.new("Square")
+invViewerIndicator.Visible = false
+invViewerIndicator.Color = Color3.fromRGB(255, 0, 0)
+invViewerIndicator.Thickness = 2
+invViewerIndicator.Filled = false
+invViewerIndicator.Size = Vector2.new(20, 20)
+
+local invViewerIndicatorText = Drawing.new("Text")
+invViewerIndicatorText.Visible = false
+invViewerIndicatorText.Color = Color3.fromRGB(255, 0, 0)
+invViewerIndicatorText.Size = 14
+invViewerIndicatorText.Center = true
+invViewerIndicatorText.Outline = true
+invViewerIndicatorText.Font = 2
+invViewerIndicatorText.Text = "[VIEWED TARGET]"
+
+RunService.RenderStepped:Connect(function()
+    if not inventoryViewerEnabled then
+        invViewerIndicator.Visible = false
+        invViewerIndicatorText.Visible = false
+        return
+    end
+
+    local targetPlayer = Players:FindFirstChild(selectedTargetPlayer)
+    if not targetPlayer or targetPlayer == LocalPlayer or not targetPlayer.Character or not targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
+        invViewerIndicator.Visible = false
+        invViewerIndicatorText.Visible = false
+        return
+    end
+
+    local cam = Workspace.CurrentCamera
+    if not cam then return end
+
+    local hrp = targetPlayer.Character.HumanoidRootPart
+    local screenPos, onScreen = cam:WorldToViewportPoint(hrp.Position)
+    local distance = (hrp.Position - character.HumanoidRootPart.Position).Magnitude
+
+    if onScreen then
+        invViewerIndicator.Size = Vector2.new(30, 40)
+        invViewerIndicator.Position = Vector2.new(screenPos.X - 15, screenPos.Y - 20)
+        invViewerIndicator.Visible = true
+
+        invViewerIndicatorText.Position = Vector2.new(screenPos.X, screenPos.Y - 38)
+        invViewerIndicatorText.Text = string.format("[VIEWED: %s | %.0fm]", selectedTargetPlayer, distance)
+        invViewerIndicatorText.Visible = true
+    else
+        -- Off-screen clamping indicator could go here, but hiding or pointing edge can just be handled by making it invisible if off-screen
+        invViewerIndicator.Visible = false
+        invViewerIndicatorText.Visible = false
+    end
+end)
 
 local function getItemAttachmentsInfo(itemObj)
     if not itemObj then return nil, nil end
@@ -2289,7 +2338,7 @@ loadBtn.MouseButton1Click:Connect(function() loadConfigByName(configNameBox.Text
 local resetBtn = Instance.new("TextButton")
 resetBtn.Size = UDim2.new(1, -8, 0, 28)
 resetBtn.BackgroundColor3 = Color3.fromRGB(110, 75, 35)
-resetBtn.TextColor3 = ThemeColors.TextPrimary
+resetBtn.TextColor3 =ThemeColors.TextPrimary
 resetBtn.TextSize = 12
 resetBtn.Font = MAIN_FONT
 resetBtn.Text = "RESET TO DEFAULT"
