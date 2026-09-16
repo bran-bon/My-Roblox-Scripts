@@ -1049,7 +1049,6 @@ local noGrassEnabled = false
 local fullbrightEnabled = false
 local brightLoop = nil
 
--- Master ESP Toggle Switch & Keybind variables (now toggles player and npc esp together)
 local playerESPMasterEnabled = true
 local playerESPKey = Enum.KeyCode.Y
 local setPlayerESPMasterUI = nil
@@ -1898,6 +1897,8 @@ Players.PlayerAdded:Connect(function(player)
 end)
 Players.PlayerRemoving:Connect(function(player) removePlayerESP(player) end)
 
+local Setters = {}
+
 do
     _, setPlayerESPMasterUI = createToggleUI(visualsContainer, "esp master", playerESPMasterEnabled, function(val)
         playerESPMasterEnabled = val
@@ -1923,7 +1924,7 @@ do
         end
     end)
 
-    _, setGearESP = createToggleUI(visualsContainer, "gear esp", gearESPEnabled, function(val)
+    _, Setters.setGearESP = createToggleUI(visualsContainer, "gear esp", gearESPEnabled, function(val)
         gearESPEnabled = val
     end)
 
@@ -1977,7 +1978,7 @@ do
         LocalPlayer.CameraMinZoomDistance = 0.5
     end)
 
-    local _, setNoGrass = createToggleUI(visualsContainer, "no grass", noGrassEnabled, function(val)
+    _, Setters.setNoGrass = createToggleUI(visualsContainer, "no grass", noGrassEnabled, function(val)
         noGrassEnabled = val
         for _, item in ipairs(Workspace:GetDescendants()) do
             if item:IsA("Terrain") then
@@ -1986,7 +1987,7 @@ do
         end
     end)
 
-    local _, setFullbright = createToggleUI(visualsContainer, "fullbright", fullbrightEnabled, function(val)
+    _, Setters.setFullbright = createToggleUI(visualsContainer, "fullbright", fullbrightEnabled, function(val)
         fullbrightEnabled = val
         if val then
             if brightLoop then brightLoop:Disconnect() end
@@ -2206,29 +2207,29 @@ do
         end
     end)
 
-    local _, setAimNpc = createToggleUI(aimbotContainer, "aim npcs", aimNpcEnabled, function(val)
+    _, Setters.setAimNpc = createToggleUI(aimbotContainer, "aim npcs", aimNpcEnabled, function(val)
         aimNpcEnabled = val
         if not val and currentTarget and currentTarget:IsA("Model") then ResetTarget() end
     end)
 
-    local _, setTeamCheck = createToggleUI(aimbotContainer, "team check", teamCheckEnabled, function(val)
+    _, Setters.setTeamCheck = createToggleUI(aimbotContainer, "team check", teamCheckEnabled, function(val)
         teamCheckEnabled = val
         if val and currentTarget and isTeammate(currentTarget) then ResetTarget() end
     end)
 
-    local _, setToggleKey = createKeybindUI(aimbotContainer, "aimbot key", toggleKey, function(key)
+    _, Setters.setToggleKey = createKeybindUI(aimbotContainer, "aimbot key", toggleKey, function(key)
         toggleKey = key
     end)
 
-    local _, setAimPart = createDropdownUI(aimbotContainer, "aim part", {"Head", "UpperTorso", "LowerTorso"}, "Head", function(val)
+    _, Setters.setAimPart = createDropdownUI(aimbotContainer, "aim part", {"Head", "UpperTorso", "LowerTorso"}, "Head", function(val)
         AimPart = val
     end)
 
-    local _, setSmoothing = createSliderUI(aimbotContainer, "smoothing", 0.01, 1, 0.01, smoothing, function(val)
+    _, Setters.setSmoothing = createSliderUI(aimbotContainer, "smoothing", 0.01, 1, 0.01, smoothing, function(val)
         smoothing = val
     end)
 
-    local _, setPrediction = createSliderUI(aimbotContainer, "prediction", 0, 0.5, 0.01, predictionFactor, function(val)
+    _, Setters.setPrediction = createSliderUI(aimbotContainer, "prediction", 0, 0.5, 0.01, predictionFactor, function(val)
         predictionFactor = val
     end)
 end
@@ -2305,7 +2306,7 @@ do
 end
 
 do
-    local _, setNoRecoil = createToggleUI(modsContainer, "no recoil", noRecoilEnabled, function(val)
+    _, Setters.setNoRecoil = createToggleUI(modsContainer, "no recoil", noRecoilEnabled, function(val)
         noRecoilEnabled = val
         local rangedWeapons = ReplicatedStorage:FindFirstChild("RangedWeapons")
         if not rangedWeapons then return end
@@ -2326,7 +2327,7 @@ do
         end
     end)
 
-    local _, setRapidFire = createToggleUI(modsContainer, "rapid fire", rapidFireEnabled, function(val)
+    _, Setters.setRapidFire = createToggleUI(modsContainer, "rapid fire", rapidFireEnabled, function(val)
         rapidFireEnabled = val
         if not val then
             for tbl, original in pairs(originalFireModes) do
@@ -2345,7 +2346,7 @@ do
     end)
 
     local originalAmmoDropValues = {}
-    local _, setNoBulletDrop = createToggleUI(modsContainer, "no bullet drop", noBulletDropEnabled, function(val)
+    _, Setters.setNoBulletDrop = createToggleUI(modsContainer, "no bullet drop", noBulletDropEnabled, function(val)
         noBulletDropEnabled = val
         local ammoTypes = ReplicatedStorage:FindFirstChild("AmmoTypes")
         if not ammoTypes then return end
@@ -2468,24 +2469,24 @@ local function loadConfigByName(cfgName)
                 playerESPEnabled = data.playerESP
                 if setPlayerESPUI then setPlayerESPUI(data.playerESP, true) end
             end
-            if data.gearESP ~= nil then setGearESP(data.gearESP, true) end
+            if data.gearESP ~= nil then Setters.setGearESP(data.gearESP, true) end
             if data.npcESP ~= nil then 
                 npcESPEnabled = data.npcESP
                 if setNpcESPUI then setNpcESPUI(data.npcESP, true) end
             end
-            if data.noGrass ~= nil then setNoGrass(data.noGrass, true) end
-            if data.fullbright ~= nil then setFullbright(data.fullbright, true) end
+            if data.noGrass ~= nil then Setters.setNoGrass(data.noGrass, true) end
+            if data.fullbright ~= nil then Setters.setFullbright(data.fullbright, true) end
             if data.aimbotMaster ~= nil then setAimbotMasterUI(data.aimbotMaster, true) end
-            if data.aimNpc ~= nil then setAimNpc(data.aimNpc, true) end
-            if data.teamCheck ~= nil then setTeamCheck(data.teamCheck, true) end
-            if data.smoothing ~= nil then setSmoothing(data.smoothing, true) end
-            if data.predictionFactor ~= nil then setPrediction(data.predictionFactor, true) end
-            if data.aimPart ~= nil then setAimPart(data.aimPart, true) end
-            if data.toggleKey ~= nil and Enum.KeyCode[data.toggleKey] then setToggleKey(Enum.KeyCode[data.toggleKey], true) end
+            if data.aimNpc ~= nil then Setters.setAimNpc(data.aimNpc, true) end
+            if data.teamCheck ~= nil then Setters.setTeamCheck(data.teamCheck, true) end
+            if data.smoothing ~= nil then Setters.setSmoothing(data.smoothing, true) end
+            if data.predictionFactor ~= nil then Setters.setPrediction(data.predictionFactor, true) end
+            if data.aimPart ~= nil then Setters.setAimPart(data.aimPart, true) end
+            if data.toggleKey ~= nil and Enum.KeyCode[data.toggleKey] then Setters.setToggleKey(Enum.KeyCode[data.toggleKey], true) end
             if data.guiToggleKey ~= nil and Enum.KeyCode[data.guiToggleKey] then guiToggleKey = Enum.KeyCode[data.guiToggleKey] end
-            if data.noRecoil ~= nil then setNoRecoil(data.noRecoil, true) end
-            if data.rapidFire ~= nil then setRapidFire(data.rapidFire, true) end
-            if data.noBulletDrop ~= nil then setNoBulletDrop(data.noBulletDrop, true) end
+            if data.noRecoil ~= nil then Setters.setNoRecoil(data.noRecoil, true) end
+            if data.rapidFire ~= nil then Setters.setRapidFire(data.rapidFire, true) end
+            if data.noBulletDrop ~= nil then Setters.setNoBulletDrop(data.noBulletDrop, true) end
         end
     end
 end
@@ -2495,20 +2496,20 @@ local function resetToDefault()
     npcESPEnabled = true
     if setPlayerESPUI then setPlayerESPUI(true, true) end
     if setNpcESPUI then setNpcESPUI(true, true) end
-    setGearESP(false, true)
-    setNoGrass(false, true)
-    setFullbright(false, true)
-    setAimbotMasterUI(true, true)
-    setAimNpc(true, true)
-    setTeamCheck(true, true)
-    setSmoothing(0.2, true)
-    setPrediction(0.12, true)
-    setAimPart("Head", true)
-    setToggleKey(Enum.KeyCode.X, true)
+    Setters.setGearESP(false, true)
+    Setters.setNoGrass(false, true)
+    Setters.setFullbright(false, true)
+    if setAimbotMasterUI then setAimbotMasterUI(true, true) end
+    Setters.setAimNpc(true, true)
+    Setters.setTeamCheck(true, true)
+    Setters.setSmoothing(0.2, true)
+    Setters.setPrediction(0.12, true)
+    Setters.setAimPart("Head", true)
+    Setters.setToggleKey(Enum.KeyCode.X, true)
     guiToggleKey = Enum.KeyCode.RightShift
-    setNoRecoil(false, true)
-    setRapidFire(false, true)
-    setNoBulletDrop(false, true)
+    Setters.setNoRecoil(false, true)
+    Setters.setRapidFire(false, true)
+    Setters.setNoBulletDrop(false, true)
 end
 
 local saveBtn = Instance.new("TextButton")
