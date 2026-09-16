@@ -112,7 +112,7 @@ titleLabel.BackgroundTransparency = 1
 titleLabel.TextColor3 = ThemeColors.TextPrimary
 titleLabel.TextSize = 14
 titleLabel.Font = MAIN_FONT
-titleLabel.Text = "FUR HUB"
+titleLabel.Text = "fur hub"
 titleLabel.TextXAlignment = Enum.TextXAlignment.Left
 titleLabel.Parent = topBar
 table.insert(themeElementsTracker.Texts, titleLabel)
@@ -137,7 +137,7 @@ local function createTabButton(name)
     btn.TextColor3 = ThemeColors.TextSecondary
     btn.TextSize = 10
     btn.Font = MAIN_FONT
-    btn.Text = string.upper(name)
+    btn.Text = string.lower(name)
     btn.Parent = tabContainer
     applyCorner(btn, 4)
     table.insert(themeElementsTracker.Buttons, btn)
@@ -188,7 +188,7 @@ local configContainer = createTabButton("Config")
 local themesContainer = createTabButton("Themes")
 
 for _, b in ipairs(tabContainer:GetChildren()) do
-    if b:IsA("TextButton") and b.Text == "VISUALS" then
+    if b:IsA("TextButton") and b.Text == "visuals" then
         b.BackgroundColor3 = ThemeColors.ButtonHover
         b.TextColor3 = ThemeColors.TextPrimary
     end
@@ -201,7 +201,7 @@ local function createToggleUI(parent, name, defaultState, callback)
     btn.TextColor3 = ThemeColors.TextPrimary
     btn.TextSize = 12
     btn.Font = MAIN_FONT
-    btn.Text = string.upper(name) .. ": " .. (defaultState and "ON" or "OFF")
+    btn.Text = string.lower(name) .. ": " .. (defaultState and "on" or "off")
     btn.Parent = parent
     applyCorner(btn, 4)
     table.insert(themeElementsTracker.Texts, btn)
@@ -209,7 +209,7 @@ local function createToggleUI(parent, name, defaultState, callback)
     local state = defaultState
     local updateState = function(newState, fireCallback)
         state = newState
-        btn.Text = string.upper(name) .. ": " .. (state and "ON" or "OFF")
+        btn.Text = string.lower(name) .. ": " .. (state and "on" or "off")
         btn.BackgroundColor3 = state and ThemeColors.EnabledColor or ThemeColors.DisabledColor
         if fireCallback then
             callback(state)
@@ -231,7 +231,7 @@ local function createButtonUI(parent, name, callback)
     btn.TextColor3 = ThemeColors.TextPrimary
     btn.TextSize = 12
     btn.Font = MAIN_FONT
-    btn.Text = string.upper(name)
+    btn.Text = string.lower(name)
     btn.Parent = parent
     applyCorner(btn, 4)
     table.insert(themeElementsTracker.Buttons, btn)
@@ -257,7 +257,7 @@ local function createDropdownUI(parent, name, options, initialVal, callback)
     mainBtn.TextColor3 = ThemeColors.TextPrimary
     mainBtn.TextSize = 12
     mainBtn.Font = MAIN_FONT
-    mainBtn.Text = string.upper(name) .. ": " .. tostring(initialVal)
+    mainBtn.Text = string.lower(name) .. ": " .. string.lower(tostring(initialVal))
     mainBtn.Parent = container
     applyCorner(mainBtn, 4)
     table.insert(themeElementsTracker.Buttons, mainBtn)
@@ -278,7 +278,7 @@ local function createDropdownUI(parent, name, options, initialVal, callback)
     listLayout.Parent = listFrame
 
     local selectOpt = function(opt, fireCallback)
-        mainBtn.Text = string.upper(name) .. ": " .. opt
+        mainBtn.Text = string.lower(name) .. ": " .. string.lower(opt)
         isOpen = false
         listFrame.Visible = false
         container.Size = UDim2.new(1, -8, 0, 28)
@@ -304,7 +304,7 @@ local function createDropdownUI(parent, name, options, initialVal, callback)
             optBtn.TextColor3 = isHighlighted and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(200, 200, 200)
             optBtn.TextSize = 11
             optBtn.Font = MAIN_FONT
-            optBtn.Text = optName
+            optBtn.Text = string.lower(optName)
             optBtn.ZIndex = 6
             optBtn.Parent = listFrame
 
@@ -348,7 +348,7 @@ local function createSliderUI(parent, name, min, max, step, defaultVal, callback
     label.TextSize = 11
     label.Font = MAIN_FONT
     label.TextXAlignment = Enum.TextXAlignment.Left
-    label.Text = string.upper(name) .. ": " .. tostring(defaultVal)
+    label.Text = string.lower(name) .. ": " .. tostring(defaultVal)
     label.Parent = container
     table.insert(themeElementsTracker.Texts, label)
 
@@ -375,7 +375,7 @@ local function createSliderUI(parent, name, min, max, step, defaultVal, callback
         currentValue = math.clamp(val, min, max)
         currentValue = math.floor(currentValue / step + 0.5) * step
         fill.Size = UDim2.new((currentValue - min) / (max - min), 0, 1, 0)
-        label.Text = string.upper(name) .. ": " .. string.format(step < 1 and "%.2f" or "%.0f", currentValue)
+        label.Text = string.lower(name) .. ": " .. string.format(step < 1 and "%.2f" or "%.0f", currentValue)
         if fireCallback then
             callback(currentValue)
         end
@@ -416,7 +416,7 @@ local function createKeybindUI(parent, name, defaultKey, callback)
     btn.TextColor3 = ThemeColors.TextPrimary
     btn.TextSize = 12
     btn.Font = MAIN_FONT
-    btn.Text = string.upper(name) .. ": [" .. defaultKey.Name .. "]"
+    btn.Text = string.lower(name) .. ": [" .. string.lower(defaultKey.Name) .. "]"
     btn.Parent = parent
     applyCorner(btn, 4)
     table.insert(themeElementsTracker.Buttons, btn)
@@ -427,7 +427,7 @@ local function createKeybindUI(parent, name, defaultKey, callback)
 
     local updateKey = function(newKey, fireCallback)
         currentKey = newKey
-        btn.Text = string.upper(name) .. ": [" .. currentKey.Name .. "]"
+        btn.Text = string.lower(name) .. ": [" .. string.lower(currentKey.Name) .. "]"
         if fireCallback then
             callback(currentKey)
         end
@@ -436,7 +436,7 @@ local function createKeybindUI(parent, name, defaultKey, callback)
     btn.MouseButton1Click:Connect(function()
         if binding then return end
         binding = true
-        btn.Text = string.upper(name) .. ": [PRESS KEY...]"
+        btn.Text = string.lower(name) .. ": [press key...]"
         
         local connection
         connection = UserInputService.InputBegan:Connect(function(input, gameProcessed)
@@ -475,99 +475,101 @@ local function refreshTheme()
     end
 end
 
-local function createColorPickerRow(parent, labelName, currentColor, onColorChanged)
-    local container = Instance.new("Frame")
-    container.Size = UDim2.new(1, -8, 0, 32)
-    container.BackgroundColor3 = ThemeColors.TopBar
-    container.BorderSizePixel = 0
-    container.Parent = parent
-    applyCorner(container, 4)
-    table.insert(themeElementsTracker.TopBars, container)
+do
+    local function createColorPickerRow(parent, labelName, currentColor, onColorChanged)
+        local container = Instance.new("Frame")
+        container.Size = UDim2.new(1, -8, 0, 32)
+        container.BackgroundColor3 = ThemeColors.TopBar
+        container.BorderSizePixel = 0
+        container.Parent = parent
+        applyCorner(container, 4)
+        table.insert(themeElementsTracker.TopBars, container)
 
-    local lbl = Instance.new("TextLabel")
-    lbl.Size = UDim2.new(0, 140, 1, 0)
-    lbl.Position = UDim2.new(0, 8, 0, 0)
-    lbl.BackgroundTransparency = 1
-    lbl.TextColor3 = ThemeColors.TextPrimary
-    lbl.TextSize = 12
-    lbl.Font = MAIN_FONT
-    lbl.TextXAlignment = Enum.TextXAlignment.Left
-    lbl.Text = string.upper(labelName)
-    lbl.Parent = container
-    table.insert(themeElementsTracker.Texts, lbl)
+        local lbl = Instance.new("TextLabel")
+        lbl.Size = UDim2.new(0, 140, 1, 0)
+        lbl.Position = UDim2.new(0, 8, 0, 0)
+        lbl.BackgroundTransparency = 1
+        lbl.TextColor3 = ThemeColors.TextPrimary
+        lbl.TextSize = 12
+        lbl.Font = MAIN_FONT
+        lbl.TextXAlignment = Enum.TextXAlignment.Left
+        lbl.Text = string.lower(labelName)
+        lbl.Parent = container
+        table.insert(themeElementsTracker.Texts, lbl)
 
-    local function createColorInput(defaultVal, posX, nameLabel, callback)
-        local box = Instance.new("TextBox")
-        box.Size = UDim2.new(0, 42, 0, 20)
-        box.Position = UDim2.new(0, posX, 0, 6)
-        box.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-        box.TextColor3 = ThemeColors.TextPrimary
-        box.TextSize = 11
-        box.Font = MAIN_FONT
-        box.Text = tostring(math.floor(defaultVal * 255))
-        box.Parent = container
-        applyCorner(box, 3)
-        table.insert(themeElementsTracker.Texts, box)
+        local function createColorInput(defaultVal, posX, nameLabel, callback)
+            local box = Instance.new("TextBox")
+            box.Size = UDim2.new(0, 42, 0, 20)
+            box.Position = UDim2.new(0, posX, 0, 6)
+            box.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+            box.TextColor3 = ThemeColors.TextPrimary
+            box.TextSize = 11
+            box.Font = MAIN_FONT
+            box.Text = tostring(math.floor(defaultVal * 255))
+            box.Parent = container
+            applyCorner(box, 3)
+            table.insert(themeElementsTracker.Texts, box)
 
-        box.FocusLost:Connect(function()
-            local num = tonumber(box.Text)
-            if num then
-                num = math.clamp(num, 0, 255)
-                box.Text = tostring(num)
-                callback(num / 255)
-            else
-                box.Text = tostring(math.floor(defaultVal * 255))
-            end
+            box.FocusLost:Connect(function()
+                local num = tonumber(box.Text)
+                if num then
+                    num = math.clamp(num, 0, 255)
+                    box.Text = tostring(num)
+                    callback(num / 255)
+                else
+                    box.Text = tostring(math.floor(defaultVal * 255))
+                end
+            end)
+        end
+
+        local rVal, gVal, bVal = currentColor.R, currentColor.G, currentColor.B
+
+        createColorInput(rVal, 160, "R", function(newR)
+            rVal = newR
+            local updated = Color3.new(rVal, gVal, bVal)
+            onColorChanged(updated)
+            refreshTheme()
         end)
+
+        createColorInput(gVal, 210, "G", function(newG)
+            gVal = newG
+            local updated = Color3.new(rVal, gVal, bVal)
+            onColorChanged(updated)
+            refreshTheme()
+        end)
+
+        createColorInput(bVal, 260, "B", function(newB)
+            bVal = newB
+            local updated = Color3.new(rVal, gVal, bVal)
+            onColorChanged(updated)
+            refreshTheme()
+        end)
+
+        return container
     end
 
-    local rVal, gVal, bVal = currentColor.R, currentColor.G, currentColor.B
+    createColorPickerRow(themesContainer, "Main Background", ThemeColors.MainBackground, function(c) ThemeColors.MainBackground = c end)
+    createColorPickerRow(themesContainer, "Top Bar", ThemeColors.TopBar, function(c) ThemeColors.TopBar = c end)
+    createColorPickerRow(themesContainer, "Button Background", ThemeColors.ButtonBackground, function(c) ThemeColors.ButtonBackground = c end)
+    createColorPickerRow(themesContainer, "Button Hover / Active", ThemeColors.ButtonHover, function(c) ThemeColors.ButtonHover = c end)
+    createColorPickerRow(themesContainer, "Primary Text", ThemeColors.TextPrimary, function(c) ThemeColors.TextPrimary = c end)
+    createColorPickerRow(themesContainer, "Secondary Text", ThemeColors.TextSecondary, function(c) ThemeColors.TextSecondary = c end)
+    createColorPickerRow(themesContainer, "Enabled Toggle", ThemeColors.EnabledColor, function(c) ThemeColors.EnabledColor = c end)
+    createColorPickerRow(themesContainer, "Disabled Toggle", ThemeColors.DisabledColor, function(c) ThemeColors.DisabledColor = c end)
 
-    createColorInput(rVal, 160, "R", function(newR)
-        rVal = newR
-        local updated = Color3.new(rVal, gVal, bVal)
-        onColorChanged(updated)
+    createButtonUI(themesContainer, "Reset Theme Defaults", function()
+        ThemeColors.MainBackground = Color3.fromRGB(22, 22, 22)
+        ThemeColors.TopBar = Color3.fromRGB(32, 32, 32)
+        ThemeColors.ButtonBackground = Color3.fromRGB(45, 45, 45)
+        ThemeColors.ButtonHover = Color3.fromRGB(60, 60, 60)
+        ThemeColors.TextPrimary = Color3.fromRGB(240, 240, 240)
+        ThemeColors.TextSecondary = Color3.fromRGB(160, 160, 160)
+        ThemeColors.EnabledColor = Color3.fromRGB(35, 110, 50)
+        ThemeColors.DisabledColor = Color3.fromRGB(110, 35, 35)
+        ThemeColors.SliderBackground = Color3.fromRGB(50, 50, 50)
         refreshTheme()
     end)
-
-    createColorInput(gVal, 210, "G", function(newG)
-        gVal = newG
-        local updated = Color3.new(rVal, gVal, bVal)
-        onColorChanged(updated)
-        refreshTheme()
-    end)
-
-    createColorInput(bVal, 260, "B", function(newB)
-        bVal = newB
-        local updated = Color3.new(rVal, gVal, bVal)
-        onColorChanged(updated)
-        refreshTheme()
-    end)
-
-    return container
 end
-
-createColorPickerRow(themesContainer, "Main Background", ThemeColors.MainBackground, function(c) ThemeColors.MainBackground = c end)
-createColorPickerRow(themesContainer, "Top Bar", ThemeColors.TopBar, function(c) ThemeColors.TopBar = c end)
-createColorPickerRow(themesContainer, "Button Background", ThemeColors.ButtonBackground, function(c) ThemeColors.ButtonBackground = c end)
-createColorPickerRow(themesContainer, "Button Hover / Active", ThemeColors.ButtonHover, function(c) ThemeColors.ButtonHover = c end)
-createColorPickerRow(themesContainer, "Primary Text", ThemeColors.TextPrimary, function(c) ThemeColors.TextPrimary = c end)
-createColorPickerRow(themesContainer, "Secondary Text", ThemeColors.TextSecondary, function(c) ThemeColors.TextSecondary = c end)
-createColorPickerRow(themesContainer, "Enabled Toggle", ThemeColors.EnabledColor, function(c) ThemeColors.EnabledColor = c end)
-createColorPickerRow(themesContainer, "Disabled Toggle", ThemeColors.DisabledColor, function(c) ThemeColors.DisabledColor = c end)
-
-createButtonUI(themesContainer, "Reset Theme Defaults", function()
-    ThemeColors.MainBackground = Color3.fromRGB(22, 22, 22)
-    ThemeColors.TopBar = Color3.fromRGB(32, 32, 32)
-    ThemeColors.ButtonBackground = Color3.fromRGB(45, 45, 45)
-    ThemeColors.ButtonHover = Color3.fromRGB(60, 60, 60)
-    ThemeColors.TextPrimary = Color3.fromRGB(240, 240, 240)
-    ThemeColors.TextSecondary = Color3.fromRGB(160, 160, 160)
-    ThemeColors.EnabledColor = Color3.fromRGB(35, 110, 50)
-    ThemeColors.DisabledColor = Color3.fromRGB(110, 35, 35)
-    ThemeColors.SliderBackground = Color3.fromRGB(50, 50, 50)
-    refreshTheme()
-end)
 
 local invWindow = Instance.new("Frame")
 invWindow.Size = UDim2.new(0, 680, 0, 480)
@@ -592,7 +594,7 @@ invTitle.BackgroundTransparency = 1
 invTitle.TextColor3 = Color3.fromRGB(240, 240, 240)
 invTitle.TextSize = 13
 invTitle.Font = MAIN_FONT
-invTitle.Text = "INVENTORY VIEWER"
+invTitle.Text = "inventory viewer"
 invTitle.TextXAlignment = Enum.TextXAlignment.Left
 invTitle.Parent = invTopBar
 
@@ -643,7 +645,7 @@ invLeftTitle.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
 invLeftTitle.TextColor3 = Color3.fromRGB(240, 240, 240)
 invLeftTitle.TextSize = 13
 invLeftTitle.Font = MAIN_FONT
-invLeftTitle.Text = "INVENTORY"
+invLeftTitle.Text = "inventory"
 invLeftTitle.Parent = invLeftFrame
 applyCorner(invLeftTitle, 6)
 
@@ -676,7 +678,7 @@ invRightTitle.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
 invRightTitle.TextColor3 = Color3.fromRGB(240, 240, 240)
 invRightTitle.TextSize = 13
 invRightTitle.Font = MAIN_FONT
-invRightTitle.Text = "GEAR / APPEARANCE"
+invRightTitle.Text = "gear / appearance"
 invRightTitle.Parent = invRightFrame
 applyCorner(invRightTitle, 6)
 
@@ -712,7 +714,7 @@ for _, def in ipairs(gearSlotDefinitions) do
     lbl.TextColor3 = Color3.fromRGB(150, 150, 150)
     lbl.TextSize = 10
     lbl.Font = MAIN_FONT
-    lbl.Text = def.Label
+    lbl.Text = string.lower(def.Label)
     lbl.Parent = slotFrame
 
     local itemLbl = Instance.new("TextLabel")
@@ -723,7 +725,7 @@ for _, def in ipairs(gearSlotDefinitions) do
     itemLbl.TextSize = 11
     itemLbl.Font = MAIN_FONT
     itemLbl.TextWrapped = true
-    itemLbl.Text = "Empty"
+    itemLbl.Text = "empty"
     itemLbl.Parent = slotFrame
 
     gearSlots[def.SlotAttr] = {Label = itemLbl, Frame = slotFrame}
@@ -733,7 +735,6 @@ local selectedTargetPlayer = LocalPlayer.Name
 local inventoryViewerEnabled = false
 local inventoryLoopToken = 0
 
--- Inventory Viewer Tracking Indicator (Red Box/Dot)
 local invViewerIndicator = Drawing.new("Square")
 invViewerIndicator.Visible = false
 invViewerIndicator.Color = Color3.fromRGB(255, 0, 0)
@@ -748,7 +749,7 @@ invViewerIndicatorText.Size = 14
 invViewerIndicatorText.Center = true
 invViewerIndicatorText.Outline = true
 invViewerIndicatorText.Font = 2
-invViewerIndicatorText.Text = "[VIEWED TARGET]"
+invViewerIndicatorText.Text = "[viewed target]"
 
 RunService.RenderStepped:Connect(function()
     if not inventoryViewerEnabled then
@@ -777,10 +778,9 @@ RunService.RenderStepped:Connect(function()
         invViewerIndicator.Visible = true
 
         invViewerIndicatorText.Position = Vector2.new(screenPos.X, screenPos.Y - 38)
-        invViewerIndicatorText.Text = string.format("[VIEWED: %s | %.0fm]", selectedTargetPlayer, distance)
+        invViewerIndicatorText.Text = string.lower(string.format("[viewed: %s | %.0fm]", selectedTargetPlayer, distance))
         invViewerIndicatorText.Visible = true
     else
-        -- Off-screen clamping indicator could go here, but hiding or pointing edge can just be handled by making it invisible if off-screen
         invViewerIndicator.Visible = false
         invViewerIndicatorText.Visible = false
     end
@@ -849,7 +849,7 @@ local function createGridCategory(title, maxSlots, itemsMap)
     header.TextSize = 12
     header.Font = MAIN_FONT
     header.TextXAlignment = Enum.TextXAlignment.Left
-    header.Text = string.upper(title)
+    header.Text = string.lower(title)
     header.Parent = invLeftScroll
 
     local gridFrame = Instance.new("Frame")
@@ -874,15 +874,15 @@ local function createGridCategory(title, maxSlots, itemsMap)
         local itemData = itemsMap[i]
         if itemData then
             local sightName, magName = getItemAttachmentsInfo(itemData.Obj)
-            local displayText = itemData.Name
+            local displayText = string.lower(itemData.Name)
             local isWarned = shouldWarnItem(itemData.Name, sightName)
             
             if sightName then
                 local sightColorHex = (sightName == "Reapir") and "rgb(255,50,50)" or "rgb(100,220,255)"
-                displayText = displayText .. "\n" .. "<font size=\"8\" color=\"" .. sightColorHex .. "\">" .. sightName .. "</font>"
+                displayText = displayText .. "\n" .. "<font size=\"8\" color=\"" .. sightColorHex .. "\">" .. string.lower(sightName) .. "</font>"
             end
             if magName then
-                displayText = displayText .. "\n" .. "<font size=\"8\" color=\"rgb(255,150,100)\">" .. magName .. "</font>"
+                displayText = displayText .. "\n" .. "<font size=\"8\" color=\"rgb(255,150,100)\">" .. string.lower(magName) .. "</font>"
             end
 
             local nameLbl = Instance.new("TextLabel")
@@ -915,7 +915,7 @@ end
 
 local function refreshInventoryDisplay()
     for _, slotData in pairs(gearSlots) do
-        slotData.Label.Text = "Empty"
+        slotData.Label.Text = "empty"
         slotData.Label.TextColor3 = Color3.fromRGB(120, 120, 120)
         slotData.Label.RichText = false
     end
@@ -933,7 +933,7 @@ local function refreshInventoryDisplay()
     local invFolder = pFolder:FindFirstChild("Inventory")
     if not invFolder then return end
 
-    invTitle.Text = "INVENTORY VIEWER - " .. selectedTargetPlayer
+    invTitle.Text = string.lower("inventory viewer - " .. selectedTargetPlayer)
 
     local categorizedItems = {
         ChestRig = {},
@@ -949,15 +949,15 @@ local function refreshInventoryDisplay()
         if gearSlots[slotAttr] then
             local itemName = itemObj.Name
             local sightName, magName = getItemAttachmentsInfo(itemObj)
-            local displayText = itemName
+            local displayText = string.lower(itemName)
             local isWarned = shouldWarnItem(itemName, sightName)
             
             if sightName then
                 local sightColorHex = (sightName == "Reapir") and "rgb(255,50,50)" or "rgb(100,220,255)"
-                displayText = displayText .. "\n" .. "<font size=\"8\" color=\"" .. sightColorHex .. "\">" .. sightName .. "</font>"
+                displayText = displayText .. "\n" .. "<font size=\"8\" color=\"" .. sightColorHex .. "\">" .. string.lower(sightName) .. "</font>"
             end
             if magName then
-                displayText = displayText .. "\n" .. "<font size=\"8\" color=\"rgb(255,150,100)\">" .. magName .. "</font>"
+                displayText = displayText .. "\n" .. "<font size=\"8\" color=\"rgb(255,150,100)\">" .. string.lower(magName) .. "</font>"
             end
 
             gearSlots[slotAttr].Label.RichText = true
@@ -1049,6 +1049,13 @@ local noGrassEnabled = false
 local fullbrightEnabled = false
 local brightLoop = nil
 
+-- Master ESP Toggle Switch & Keybind variables (now toggles player and npc esp together)
+local playerESPMasterEnabled = true
+local playerESPKey = Enum.KeyCode.Y
+local setPlayerESPMasterUI = nil
+local setPlayerESPUI = nil
+local setNpcESPUI = nil
+
 local playerObjects = {}
 local npcObjects = {}
 
@@ -1075,16 +1082,16 @@ local function getPlayerGearInfo(char)
         for _, valName in ipairs({"ItemBack1", "ItemBack2", "ItemHip1"}) do
             local objVal = holstered:FindFirstChild(valName)
             if objVal and objVal:IsA("ObjectValue") and objVal.Value then
-                table.insert(items, objVal.Value.Name)
+                table.insert(items, string.lower(objVal.Value.Name))
             elseif objVal and objVal:IsA("StringValue") and objVal.Value ~= "" then
-                table.insert(items, objVal.Value)
+                table.insert(items, string.lower(objVal.Value))
             end
         end
     end
 
     for _, child in ipairs(char:GetChildren()) do
         if armorList[child.Name] then
-            table.insert(items, child.Name)
+            table.insert(items, string.lower(child.Name))
         end
     end
 
@@ -1443,6 +1450,27 @@ local TargetRightArm_S = false
 local TargetLeftLeg_S = false
 local TargetRightLeg_S = false
 
+local setTargetHeadUI = nil
+local setTargetUpperTorsoUI = nil
+local setTargetLowerTorsoUI = nil
+local setTargetLeftArmUI = nil
+local setTargetRightArmUI = nil
+local setTargetLeftLegUI = nil
+local setTargetRightLegUI = nil
+local setHitChanceUI = nil
+
+local blatantModeEnabled = false
+local blatantKey = Enum.KeyCode.B
+local blatantSavedSettings = nil
+local setBlatantKeyUI = nil
+
+local function checkAndClearBlatant()
+    if blatantModeEnabled then
+        blatantModeEnabled = false
+        blatantSavedSettings = nil
+    end
+end
+
 local SilentCircle = Drawing.new("Circle")
 SilentCircle.Radius = SilentFOVRadius
 SilentCircle.Color = Color3.fromRGB(255, 255, 255)
@@ -1486,13 +1514,33 @@ end
 
 local function getValidHitParts(char)
     local parts = {}
-    if TargetHead_S and char:FindFirstChild("Head") then table.insert(parts, char.Head) end
+    if TargetHead_S and (char:FindFirstChild("Head") or char:FindFirstChild("HumanoidRootPart")) then table.insert(parts, char:FindFirstChild("Head") or char.HumanoidRootPart) end
     if TargetUpperTorso_S and char:FindFirstChild("UpperTorso") then table.insert(parts, char.UpperTorso) end
     if TargetLowerTorso_S and char:FindFirstChild("LowerTorso") then table.insert(parts, char.LowerTorso) end
-    if TargetLeftArm_S and char:FindFirstChild("LeftUpperArm") then table.insert(parts, char.LeftUpperArm) end
-    if TargetRightArm_S and char:FindFirstChild("RightUpperArm") then table.insert(parts, char.RightUpperArm) end
-    if TargetLeftLeg_S and char:FindFirstChild("LeftUpperLeg") then table.insert(parts, char.LeftUpperLeg) end
-    if TargetRightLeg_S and char:FindFirstChild("RightUpperLeg") then table.insert(parts, char.RightUpperLeg) end
+    if TargetLeftArm_S then
+        if char:FindFirstChild("LeftUpperArm") then table.insert(parts, char.LeftUpperArm) end
+        if char:FindFirstChild("LeftLowerArm") then table.insert(parts, char.LeftLowerArm) end
+        if char:FindFirstChild("LeftHand") then table.insert(parts, char.LeftHand) end
+        if char:FindFirstChild("Left Arm") then table.insert(parts, char["Left Arm"]) end
+    end
+    if TargetRightArm_S then
+        if char:FindFirstChild("RightUpperArm") then table.insert(parts, char.RightUpperArm) end
+        if char:FindFirstChild("RightLowerArm") then table.insert(parts, char.RightLowerArm) end
+        if char:FindFirstChild("RightHand") then table.insert(parts, char.RightHand) end
+        if char:FindFirstChild("Right Arm") then table.insert(parts, char["Right Arm"]) end
+    end
+    if TargetLeftLeg_S then
+        if char:FindFirstChild("LeftUpperLeg") then table.insert(parts, char.LeftUpperLeg) end
+        if char:FindFirstChild("LeftLowerLeg") then table.insert(parts, char.LeftLowerLeg) end
+        if char:FindFirstChild("LeftFoot") then table.insert(parts, char.LeftFoot) end
+        if char:FindFirstChild("Left Leg") then table.insert(parts, char["Left Leg"]) end
+    end
+    if TargetRightLeg_S then
+        if char:FindFirstChild("RightUpperLeg") then table.insert(parts, char.RightUpperLeg) end
+        if char:FindFirstChild("RightLowerLeg") then table.insert(parts, char.RightLowerLeg) end
+        if char:FindFirstChild("RightFoot") then table.insert(parts, char.RightFoot) end
+        if char:FindFirstChild("Right Leg") then table.insert(parts, char["Right Leg"]) end
+    end
     return parts
 end
 
@@ -1682,6 +1730,18 @@ if Workspace.Raycast then
 end
 
 RunService.RenderStepped:Connect(function()
+    if not playerESPMasterEnabled then
+        for _, drawings in pairs(playerObjects) do
+            drawings.Text.Visible = false
+            for _, b in ipairs(drawings.Bones) do b.line.Visible = false end
+        end
+        for _, drawings in pairs(npcObjects) do
+            drawings.Text.Visible = false
+            for _, b in ipairs(drawings.Bones) do b.line.Visible = false end
+        end
+        return
+    end
+
     if not character or not character:FindFirstChild("HumanoidRootPart") then return end
     local localHRP = character.HumanoidRootPart
     local cam = Workspace.CurrentCamera
@@ -1722,7 +1782,7 @@ RunService.RenderStepped:Connect(function()
                     for _, bone in ipairs(drawings.Bones) do bone.line.Color = espColor end
 
                     local gearInfo = getPlayerGearInfo(char)
-                    drawings.Text.Text = string.format("%s [%.0fm]%s", player.Name, distance, gearInfo)
+                    drawings.Text.Text = string.lower(string.format("%s [%.0fm]%s", player.Name, distance, gearInfo))
                     drawings.Text.Center = true
                     drawings.Text.Position = Vector2.new(screenPos.X, screenPos.Y - 35)
                     drawings.Text.Visible = true
@@ -1785,7 +1845,7 @@ RunService.RenderStepped:Connect(function()
                     drawings.Text.Color = espColor
                     for _, bone in ipairs(drawings.Bones) do bone.line.Color = espColor end
 
-                    drawings.Text.Text = string.format("%s [%.0fm]", model.Name, distance)
+                    drawings.Text.Text = string.lower(string.format("%s [%.0fm]", model.Name, distance))
                     drawings.Text.Center = true
                     drawings.Text.Position = Vector2.new(screenPos.X, screenPos.Y - 35)
                     drawings.Text.Visible = true
@@ -1838,123 +1898,143 @@ Players.PlayerAdded:Connect(function(player)
 end)
 Players.PlayerRemoving:Connect(function(player) removePlayerESP(player) end)
 
-_, setPlayerESP = createToggleUI(visualsContainer, "Player ESP", playerESPEnabled, function(val)
-    playerESPEnabled = val
-    if not val then
-        for _, d in pairs(playerObjects) do
-            d.Text.Visible = false
-            for _, b in ipairs(d.Bones) do b.line.Visible = false end
-        end
-    end
-end)
-
-_, setGearESP = createToggleUI(visualsContainer, "Gear ESP", gearESPEnabled, function(val)
-    gearESPEnabled = val
-end)
-
-_, setNpcESP = createToggleUI(visualsContainer, "NPC ESP", npcESPEnabled, function(val)
-    npcESPEnabled = val
-    if not val then
-        for _, d in pairs(npcObjects) do
-            d.Text.Visible = false
-            for _, b in ipairs(d.Bones) do b.line.Visible = false end
-        end
-    end
-end)
-
-createButtonUI(visualsContainer, "Remove Visor Folder", function()
-    local success = pcall(function()
-        local visor = Players.LocalPlayer.PlayerGui.NoInsetGui.MainFrame.ScreenEffects.Visor
-        if visor then
-            local maska = visor:FindFirstChild("MaskaVisor")
-            local altyn = visor:FindFirstChild("AltynVisor")
-            if maska then maska:Destroy() end
-            if altyn then altyn:Destroy() end
+do
+    _, setPlayerESPMasterUI = createToggleUI(visualsContainer, "esp master", playerESPMasterEnabled, function(val)
+        playerESPMasterEnabled = val
+        if not val then
+            for _, d in pairs(playerObjects) do
+                d.Text.Visible = false
+                for _, b in ipairs(d.Bones) do b.line.Visible = false end
+            end
+            for _, d in pairs(npcObjects) do
+                d.Text.Visible = false
+                for _, b in ipairs(d.Bones) do b.line.Visible = false end
+            end
         end
     end)
-    if not success then
-        local noInset = LocalPlayer:FindFirstChild("PlayerGui") and LocalPlayer.PlayerGui:FindFirstChild("NoInsetGui")
-        if noInset then
-            local mainF = noInset:FindFirstChild("MainFrame")
-            if mainF then
-                local effects = mainF:FindFirstChild("ScreenEffects")
-                if effects then
-                    local vFolder = effects:FindFirstChild("Visor")
-                    if vFolder then
-                        local maska = vFolder:FindFirstChild("MaskaVisor")
-                        local altyn = vFolder:FindFirstChild("AltynVisor")
-                        if maska then maska:Destroy() end
-                        if altyn then altyn:Destroy() end
+
+    _, setPlayerESPUI = createToggleUI(visualsContainer, "player esp", playerESPEnabled, function(val)
+        playerESPEnabled = val
+        if not val then
+            for _, d in pairs(playerObjects) do
+                d.Text.Visible = false
+                for _, b in ipairs(d.Bones) do b.line.Visible = false end
+            end
+        end
+    end)
+
+    _, setGearESP = createToggleUI(visualsContainer, "gear esp", gearESPEnabled, function(val)
+        gearESPEnabled = val
+    end)
+
+    _, setNpcESPUI = createToggleUI(visualsContainer, "npc esp", npcESPEnabled, function(val)
+        npcESPEnabled = val
+        if not val then
+            for _, d in pairs(npcObjects) do
+                d.Text.Visible = false
+                for _, b in ipairs(d.Bones) do b.line.Visible = false end
+            end
+        end
+    end)
+
+    local _, setPlayerESPKey = createKeybindUI(visualsContainer, "esp key", playerESPKey, function(key)
+        playerESPKey = key
+    end)
+
+    createButtonUI(visualsContainer, "remove visor folder", function()
+        local success = pcall(function()
+            local visor = Players.LocalPlayer.PlayerGui.NoInsetGui.MainFrame.ScreenEffects.Visor
+            if visor then
+                local maska = visor:FindFirstChild("MaskaVisor")
+                local altyn = visor:FindFirstChild("AltynVisor")
+                if maska then maska:Destroy() end
+                if altyn then altyn:Destroy() end
+            end
+        end)
+        if not success then
+            local noInset = LocalPlayer:FindFirstChild("PlayerGui") and LocalPlayer.PlayerGui:FindFirstChild("NoInsetGui")
+            if noInset then
+                local mainF = noInset:FindFirstChild("MainFrame")
+                if mainF then
+                    local effects = mainF:FindFirstChild("ScreenEffects")
+                    if effects then
+                        local vFolder = effects:FindFirstChild("Visor")
+                        if vFolder then
+                            local maska = vFolder:FindFirstChild("MaskaVisor")
+                            local altyn = vFolder:FindFirstChild("AltynVisor")
+                            if maska then maska:Destroy() end
+                            if altyn then altyn:Destroy() end
+                        end
                     end
                 end
             end
         end
-    end
-end)
+    end)
 
-createButtonUI(visualsContainer, "Enable Third Person", function()
-    LocalPlayer.CameraMode = Enum.CameraMode.Classic
-    LocalPlayer.CameraMaxZoomDistance = 400
-    LocalPlayer.CameraMinZoomDistance = 0.5
-end)
+    createButtonUI(visualsContainer, "enable third person", function()
+        LocalPlayer.CameraMode = Enum.CameraMode.Classic
+        LocalPlayer.CameraMaxZoomDistance = 400
+        LocalPlayer.CameraMinZoomDistance = 0.5
+    end)
 
-local _, setNoGrass = createToggleUI(visualsContainer, "No Grass", noGrassEnabled, function(val)
-    noGrassEnabled = val
-    for _, item in ipairs(Workspace:GetDescendants()) do
-        if item:IsA("Terrain") then
-            sethiddenproperty(item, "Decoration", not val)
-        end
-    end
-end)
-
-local _, setFullbright = createToggleUI(visualsContainer, "Fullbright", fullbrightEnabled, function(val)
-    fullbrightEnabled = val
-    if val then
-        if brightLoop then brightLoop:Disconnect() end
-        local function brightFunc()
-            Lighting.Brightness = 2
-            Lighting.ClockTime = 14
-            Lighting.FogEnd = 100000
-            Lighting.GlobalShadows = false
-            Lighting.OutdoorAmbient = Color3.fromRGB(128, 128, 128)
-        end
-        brightLoop = RunService.RenderStepped:Connect(brightFunc)
-    else
-        if brightLoop then
-            brightLoop:Disconnect()
-            brightLoop = nil
-        end
-    end
-end)
-
-createButtonUI(visualsContainer, "Bring Agents to Vault", function()
-    local paths = {
-        Workspace:WaitForChild("Anna", 5),
-        Workspace:WaitForChild("Nurse", 5),
-        Workspace:WaitForChild("Mihkel", 5),
-        Workspace:WaitForChild("Blaze", 5),
-        Workspace:WaitForChild("Tarmo", 5),
-        Workspace:WaitForChild("Boss", 5)
-    }
-
-    local spacing = 5
-    local targetX = -155
-    local targetZ = -427
-
-    for i, model in ipairs(paths) do
-        if model and model:IsA("Model") then
-            local primaryPart = model.PrimaryPart or model:FindFirstChildWhichIsA("BasePart")
-            if primaryPart then
-                local currentCF = primaryPart.CFrame
-                local originalY = currentCF.Position.Y
-                local newZ = targetZ + ((i - 1) * spacing)
-                
-                local targetCF = CFrame.new(targetX, originalY, newZ) * CFrame.Angles(0, math.rad(270), 0)
-                model:PivotTo(targetCF)
+    local _, setNoGrass = createToggleUI(visualsContainer, "no grass", noGrassEnabled, function(val)
+        noGrassEnabled = val
+        for _, item in ipairs(Workspace:GetDescendants()) do
+            if item:IsA("Terrain") then
+                sethiddenproperty(item, "Decoration", not val)
             end
         end
-    end
-end)
+    end)
+
+    local _, setFullbright = createToggleUI(visualsContainer, "fullbright", fullbrightEnabled, function(val)
+        fullbrightEnabled = val
+        if val then
+            if brightLoop then brightLoop:Disconnect() end
+            local function brightFunc()
+                Lighting.Brightness = 2
+                Lighting.ClockTime = 14
+                Lighting.FogEnd = 100000
+                Lighting.GlobalShadows = false
+                Lighting.OutdoorAmbient = Color3.fromRGB(128, 128, 128)
+            end
+            brightLoop = RunService.RenderStepped:Connect(brightFunc)
+        else
+            if brightLoop then
+                brightLoop:Disconnect()
+                brightLoop = nil
+            end
+        end
+    end)
+
+    createButtonUI(visualsContainer, "bring agents to vault", function()
+        local paths = {
+            Workspace:WaitForChild("Anna", 5),
+            Workspace:WaitForChild("Nurse", 5),
+            Workspace:WaitForChild("Mihkel", 5),
+            Workspace:WaitForChild("Blaze", 5),
+            Workspace:WaitForChild("Tarmo", 5),
+            Workspace:WaitForChild("Boss", 5)
+        }
+
+        local spacing = 5
+        local targetX = -155
+        local targetZ = -427
+
+        for i, model in ipairs(paths) do
+            if model and model:IsA("Model") then
+                local primaryPart = model.PrimaryPart or model:FindFirstChildWhichIsA("BasePart")
+                if primaryPart then
+                    local currentCF = primaryPart.CFrame
+                    local originalY = currentCF.Position.Y
+                    local newZ = targetZ + ((i - 1) * spacing)
+                    
+                    local targetCF = CFrame.new(targetX, originalY, newZ) * CFrame.Angles(0, math.rad(270), 0)
+                    model:PivotTo(targetCF)
+                end
+            end
+        end
+    end)
+end
 
 oldWait = hookfunction(task.wait, function(n)
     if rapidFireEnabled then
@@ -2040,140 +2120,254 @@ UserInputService.InputBegan:Connect(function(input, gameProcessedEvent)
         end
         return
     end
-end)
 
-_, setAimbotMasterUI = createToggleUI(aimbotContainer, "Aimbot", AimbotMasterEnabled, function(val)
-    AimbotMasterEnabled = val
-    if AimbotMasterEnabled then
-        if SilentAimEnabled then
-            SilentAimEnabled = false
-            if setSilentAimUI then setSilentAimUI(false, false) end
+    if input.KeyCode == playerESPKey then
+        if playerESPMasterEnabled then
+            playerESPEnabled = not playerESPEnabled
+            npcESPEnabled = playerESPEnabled
+            if setPlayerESPUI then setPlayerESPUI(playerESPEnabled, true) end
+            if setNpcESPUI then setNpcESPUI(npcESPEnabled, true) end
         end
-    else
-        AimbotEnabled = false
-        ResetTarget()
+        return
+    end
+
+    if input.KeyCode == blatantKey then
+        if not blatantModeEnabled then
+            blatantSavedSettings = {
+                hitChance = SilentHitChance,
+                head = TargetHead_S,
+                upperTorso = TargetUpperTorso_S,
+                lowerTorso = TargetLowerTorso_S,
+                leftArm = TargetLeftArm_S,
+                rightArm = TargetRightArm_S,
+                leftLeg = TargetLeftLeg_S,
+                rightLeg = TargetRightLeg_S,
+            }
+            blatantModeEnabled = true
+            
+            SilentHitChance = 100
+            if setHitChanceUI then setHitChanceUI(100) end
+
+            TargetHead_S = true
+            TargetUpperTorso_S = false
+            TargetLowerTorso_S = false
+            TargetLeftArm_S = false
+            TargetRightArm_S = false
+            TargetLeftLeg_S = false
+            TargetRightLeg_S = false
+
+            if setTargetHeadUI then setTargetHeadUI(true, false) end
+            if setTargetUpperTorsoUI then setTargetUpperTorsoUI(false, false) end
+            if setTargetLowerTorsoUI then setTargetLowerTorsoUI(false, false) end
+            if setTargetLeftArmUI then setTargetLeftArmUI(false, false) end
+            if setTargetRightArmUI then setTargetRightArmUI(false, false) end
+            if setTargetLeftLegUI then setTargetLeftLegUI(false, false) end
+            if setTargetRightLegUI then setTargetRightLegUI(false, false) end
+        else
+            blatantModeEnabled = false
+            if blatantSavedSettings then
+                SilentHitChance = blatantSavedSettings.hitChance
+                if setHitChanceUI then setHitChanceUI(SilentHitChance) end
+
+                TargetHead_S = blatantSavedSettings.head
+                TargetUpperTorso_S = blatantSavedSettings.upperTorso
+                TargetLowerTorso_S = blatantSavedSettings.lowerTorso
+                TargetLeftArm_S = blatantSavedSettings.leftArm
+                TargetRightArm_S = blatantSavedSettings.rightArm
+                TargetLeftLeg_S = blatantSavedSettings.leftLeg
+                TargetRightLeg_S = blatantSavedSettings.rightLeg
+
+                if setTargetHeadUI then setTargetHeadUI(TargetHead_S, false) end
+                if setTargetUpperTorsoUI then setTargetUpperTorsoUI(TargetUpperTorso_S, false) end
+                if setTargetLowerTorsoUI then setTargetLowerTorsoUI(TargetLowerTorso_S, false) end
+                if setTargetLeftArmUI then setTargetLeftArmUI(TargetLeftArm_S, false) end
+                if setTargetRightArmUI then setTargetRightArmUI(TargetRightArm_S, false) end
+                if setTargetLeftLegUI then setTargetLeftLegUI(TargetLeftLeg_S, false) end
+                if setTargetRightLegUI then setTargetRightLegUI(TargetRightLeg_S, false) end
+
+                blatantSavedSettings = nil
+            end
+        end
+        return
     end
 end)
 
-local _, setAimNpc = createToggleUI(aimbotContainer, "Aim NPCs", aimNpcEnabled, function(val)
-    aimNpcEnabled = val
-    if not val and currentTarget and currentTarget:IsA("Model") then ResetTarget() end
-end)
+do
+    _, setAimbotMasterUI = createToggleUI(aimbotContainer, "aimbot", AimbotMasterEnabled, function(val)
+        AimbotMasterEnabled = val
+        if AimbotMasterEnabled then
+            if SilentAimEnabled then
+                SilentAimEnabled = false
+                if setSilentAimUI then setSilentAimUI(false, false) end
+            end
+        else
+            AimbotEnabled = false
+            ResetTarget()
+        end
+    end)
 
-local _, setTeamCheck = createToggleUI(aimbotContainer, "Team Check", teamCheckEnabled, function(val)
-    teamCheckEnabled = val
-    if val and currentTarget and isTeammate(currentTarget) then ResetTarget() end
-end)
+    local _, setAimNpc = createToggleUI(aimbotContainer, "aim npcs", aimNpcEnabled, function(val)
+        aimNpcEnabled = val
+        if not val and currentTarget and currentTarget:IsA("Model") then ResetTarget() end
+    end)
 
-local _, setToggleKey = createKeybindUI(aimbotContainer, "Aimbot Key", toggleKey, function(key)
-    toggleKey = key
-end)
+    local _, setTeamCheck = createToggleUI(aimbotContainer, "team check", teamCheckEnabled, function(val)
+        teamCheckEnabled = val
+        if val and currentTarget and isTeammate(currentTarget) then ResetTarget() end
+    end)
 
-local _, setAimPart = createDropdownUI(aimbotContainer, "Aim Part", {"Head", "UpperTorso", "LowerTorso"}, "Head", function(val)
-    AimPart = val
-end)
+    local _, setToggleKey = createKeybindUI(aimbotContainer, "aimbot key", toggleKey, function(key)
+        toggleKey = key
+    end)
 
-local _, setSmoothing = createSliderUI(aimbotContainer, "Smoothing", 0.01, 1, 0.01, smoothing, function(val)
-    smoothing = val
-end)
+    local _, setAimPart = createDropdownUI(aimbotContainer, "aim part", {"Head", "UpperTorso", "LowerTorso"}, "Head", function(val)
+        AimPart = val
+    end)
 
-local _, setPrediction = createSliderUI(aimbotContainer, "Prediction", 0, 0.5, 0.01, predictionFactor, function(val)
-    predictionFactor = val
-end)
+    local _, setSmoothing = createSliderUI(aimbotContainer, "smoothing", 0.01, 1, 0.01, smoothing, function(val)
+        smoothing = val
+    end)
 
-_, setSilentAimUI = createToggleUI(silentContainer, "Silent Aim", SilentAimEnabled, function(val)
-    SilentAimEnabled = val
-    if SilentAimEnabled then
-        AimbotEnabled = false
-        ResetTarget()
-        if setAimbotMasterUI then setAimbotMasterUI(false, false) end
-    else
-        if isTriggerbotHolding then
+    local _, setPrediction = createSliderUI(aimbotContainer, "prediction", 0, 0.5, 0.01, predictionFactor, function(val)
+        predictionFactor = val
+    end)
+end
+
+do
+    _, setSilentAimUI = createToggleUI(silentContainer, "silent aim", SilentAimEnabled, function(val)
+        SilentAimEnabled = val
+        if SilentAimEnabled then
+            AimbotEnabled = false
+            ResetTarget()
+            if setAimbotMasterUI then setAimbotMasterUI(false, false) end
+        else
+            if isTriggerbotHolding then
+                pcall(function() VirtualUser:Button1Up(Vector2.new(0,0)) end)
+                isTriggerbotHolding = false
+            end
+        end
+    end)
+
+    createToggleUI(silentContainer, "team check", silentTeamCheckEnabled, function(val) silentTeamCheckEnabled = val end)
+    createToggleUI(silentContainer, "fov circle", CircleVisible, function(val) CircleVisible = val end)
+    createToggleUI(silentContainer, "triggerbot", TriggerbotEnabled, function(val)
+        TriggerbotEnabled = val
+        if not val and isTriggerbotHolding then
             pcall(function() VirtualUser:Button1Up(Vector2.new(0,0)) end)
             isTriggerbotHolding = false
         end
-    end
-end)
+    end)
+    createSliderUI(silentContainer, "burst limit", 0, 15, 1, TriggerbotBurstLimit, function(val) TriggerbotBurstLimit = val end)
+    createToggleUI(silentContainer, "target npcs", TargetNpcs_S, function(val) TargetNpcs_S = val end)
 
-createToggleUI(silentContainer, "Team Check", silentTeamCheckEnabled, function(val) silentTeamCheckEnabled = val end)
-createToggleUI(silentContainer, "FOV Circle", CircleVisible, function(val) CircleVisible = val end)
-createToggleUI(silentContainer, "Triggerbot", TriggerbotEnabled, function(val)
-    TriggerbotEnabled = val
-    if not val and isTriggerbotHolding then
-        pcall(function() VirtualUser:Button1Up(Vector2.new(0,0)) end)
-        isTriggerbotHolding = false
-    end
-end)
-createSliderUI(silentContainer, "Burst Limit", 0, 15, 1, TriggerbotBurstLimit, function(val) TriggerbotBurstLimit = val end)
-createToggleUI(silentContainer, "Target NPCs", TargetNpcs_S, function(val) TargetNpcs_S = val end)
-createToggleUI(silentContainer, "Target Head", TargetHead_S, function(val) TargetHead_S = val end)
-createToggleUI(silentContainer, "Target UpperTorso", TargetUpperTorso_S, function(val) TargetUpperTorso_S = val end)
-createToggleUI(silentContainer, "Target LowerTorso", TargetLowerTorso_S, function(val) TargetLowerTorso_S = val end)
-createSliderUI(silentContainer, "FOV Radius", 20, 400, 5, SilentFOVRadius, function(val) SilentFOVRadius = val end)
-createSliderUI(silentContainer, "Hit Chance", 10, 100, 5, SilentHitChance, function(val) SilentHitChance = val end)
+    _, setTargetHeadUI = createToggleUI(silentContainer, "target head", TargetHead_S, function(val)
+        TargetHead_S = val
+        checkAndClearBlatant()
+    end)
+    _, setTargetUpperTorsoUI = createToggleUI(silentContainer, "target uppertorso", TargetUpperTorso_S, function(val)
+        TargetUpperTorso_S = val
+        checkAndClearBlatant()
+    end)
+    _, setTargetLowerTorsoUI = createToggleUI(silentContainer, "target lowertorso", TargetLowerTorso_S, function(val)
+        TargetLowerTorso_S = val
+        checkAndClearBlatant()
+    end)
+    _, setTargetLeftArmUI = createToggleUI(silentContainer, "target left arm", TargetLeftArm_S, function(val)
+        TargetLeftArm_S = val
+        checkAndClearBlatant()
+    end)
+    _, setTargetRightArmUI = createToggleUI(silentContainer, "target right arm", TargetRightArm_S, function(val)
+        TargetRightArm_S = val
+        checkAndClearBlatant()
+    end)
+    _, setTargetLeftLegUI = createToggleUI(silentContainer, "target left leg", TargetLeftLeg_S, function(val)
+        TargetLeftLeg_S = val
+        checkAndClearBlatant()
+    end)
+    _, setTargetRightLegUI = createToggleUI(silentContainer, "target right leg", TargetRightLeg_S, function(val)
+        TargetRightLeg_S = val
+        checkAndClearBlatant()
+    end)
 
-local _, setNoRecoil = createToggleUI(modsContainer, "No Recoil", noRecoilEnabled, function(val)
-    noRecoilEnabled = val
-    local rangedWeapons = ReplicatedStorage:FindFirstChild("RangedWeapons")
-    if not rangedWeapons then return end
+    createSliderUI(silentContainer, "fov radius", 20, 400, 5, SilentFOVRadius, function(val)
+        SilentFOVRadius = val
+        checkAndClearBlatant()
+    end)
 
-    if val then
-        originalRecoilValues = {}
-        for _, desc in ipairs(rangedWeapons:GetDescendants()) do
-            if desc:IsA("NumberValue") and (desc.Name == "x" or desc.Name == "y") then
-                originalRecoilValues[desc] = desc.Value
-                desc.Value = 0
-            end
-        end
-    else
-        for desc, origVal in pairs(originalRecoilValues) do
-            if desc and desc.Parent then desc.Value = origVal end
-        end
-        originalRecoilValues = {}
-    end
-end)
+    _, setHitChanceUI = createSliderUI(silentContainer, "hit chance", 10, 100, 5, SilentHitChance, function(val)
+        SilentHitChance = val
+        checkAndClearBlatant()
+    end)
 
-local _, setRapidFire = createToggleUI(modsContainer, "Rapid Fire", rapidFireEnabled, function(val)
-    rapidFireEnabled = val
-    if not val then
-        for tbl, original in pairs(originalFireModes) do
-            if type(tbl) == "table" then
-                if original.FireMode ~= nil then tbl.FireMode = original.FireMode end
-                if original.FireModes ~= nil then
-                    tbl.FireModes = {}
-                    for idx, mode in ipairs(original.FireModes) do tbl.FireModes[idx] = mode end
+    setBlatantKeyUI = createKeybindUI(silentContainer, "blatant mode key", blatantKey, function(key)
+        blatantKey = key
+    end)
+end
+
+do
+    local _, setNoRecoil = createToggleUI(modsContainer, "no recoil", noRecoilEnabled, function(val)
+        noRecoilEnabled = val
+        local rangedWeapons = ReplicatedStorage:FindFirstChild("RangedWeapons")
+        if not rangedWeapons then return end
+
+        if val then
+            originalRecoilValues = {}
+            for _, desc in ipairs(rangedWeapons:GetDescendants()) do
+                if desc:IsA("NumberValue") and (desc.Name == "x" or desc.Name == "y") then
+                    originalRecoilValues[desc] = desc.Value
+                    desc.Value = 0
                 end
-                if original.Rate ~= nil then tbl.FireRate = original.FireRate end
-                if original.CycleTiming ~= nil then tbl.CycleTiming = original.CycleTiming end
             end
-        end
-        originalFireModes = {}
-    end
-end)
-
-local originalAmmoDropValues = {}
-local _, setNoBulletDrop = createToggleUI(modsContainer, "No Bullet Drop", noBulletDropEnabled, function(val)
-    noBulletDropEnabled = val
-    local ammoTypes = ReplicatedStorage:FindFirstChild("AmmoTypes")
-    if not ammoTypes then return end
-
-    if val then
-        originalAmmoDropValues = {}
-        for _, ammo in ipairs(ammoTypes:GetChildren()) do
-            if ammo:IsA("Instance") then
-                originalAmmoDropValues[ammo] = ammo:GetAttribute("ProjectileDrop")
-                if ammo:GetAttribute("ProjectileDrop") ~= nil then ammo:SetAttribute("ProjectileDrop", 0) end
+        else
+            for desc, origVal in pairs(originalRecoilValues) do
+                if desc and desc.Parent then desc.Value = origVal end
             end
+            originalRecoilValues = {}
         end
-    else
-        for ammo, origDrop in pairs(originalAmmoDropValues) do
-            if ammo and ammo.Parent and origDrop ~= nil then ammo:SetAttribute("ProjectileDrop", origDrop) end
-        end
-        originalAmmoDropValues = {}
-    end
-end)
+    end)
 
-createKeybindUI(configContainer, "GUI Toggle Key", guiToggleKey, function(key)
+    local _, setRapidFire = createToggleUI(modsContainer, "rapid fire", rapidFireEnabled, function(val)
+        rapidFireEnabled = val
+        if not val then
+            for tbl, original in pairs(originalFireModes) do
+                if type(tbl) == "table" then
+                    if original.FireMode ~= nil then tbl.FireMode = original.FireMode end
+                    if original.FireModes ~= nil then
+                        tbl.FireModes = {}
+                        for idx, mode in ipairs(original.FireModes) do tbl.FireModes[idx] = mode end
+                    end
+                    if original.Rate ~= nil then tbl.FireRate = original.FireRate end
+                    if original.CycleTiming ~= nil then tbl.CycleTiming = original.CycleTiming end
+                end
+            end
+            originalFireModes = {}
+        end
+    end)
+
+    local originalAmmoDropValues = {}
+    local _, setNoBulletDrop = createToggleUI(modsContainer, "no bullet drop", noBulletDropEnabled, function(val)
+        noBulletDropEnabled = val
+        local ammoTypes = ReplicatedStorage:FindFirstChild("AmmoTypes")
+        if not ammoTypes then return end
+
+        if val then
+            originalAmmoDropValues = {}
+            for _, ammo in ipairs(ammoTypes:GetChildren()) do
+                if ammo:IsA("Instance") then
+                    originalAmmoDropValues[ammo] = ammo:GetAttribute("ProjectileDrop")
+                    if ammo:GetAttribute("ProjectileDrop") ~= nil then ammo:SetAttribute("ProjectileDrop", 0) end
+                end
+            end
+        else
+            for ammo, origDrop in pairs(originalAmmoDropValues) do
+                if ammo and ammo.Parent and origDrop ~= nil then ammo:SetAttribute("ProjectileDrop", origDrop) end
+            end
+            originalAmmoDropValues = {}
+        end
+    end)
+end
+
+createKeybindUI(configContainer, "gui toggle key", guiToggleKey, function(key)
     guiToggleKey = key
 end)
 
@@ -2188,7 +2382,7 @@ configNameBox.BackgroundColor3 = ThemeColors.ButtonBackground
 configNameBox.TextColor3 = ThemeColors.TextPrimary
 configNameBox.TextSize = 12
 configNameBox.Font = MAIN_FONT
-configNameBox.PlaceholderText = "ENTER CONFIG NAME..."
+configNameBox.PlaceholderText = "enter config name..."
 configNameBox.Text = ""
 configNameBox.Parent = configContainer
 applyCorner(configNameBox, 4)
@@ -2209,7 +2403,7 @@ end
 local initialList = getConfigsList()
 local initialSelection = #initialList > 0 and initialList[1] or ""
 
-local loadDropdownContainer, selectLoadOpt, updateLoadDropdown = createDropdownUI(configContainer, "Load Config", initialList, initialSelection, function(val)
+local loadDropdownContainer, selectLoadOpt, updateLoadDropdown = createDropdownUI(configContainer, "load config", initialList, initialSelection, function(val)
     configNameBox.Text = val
 end)
 
@@ -2270,9 +2464,15 @@ local function loadConfigByName(cfgName)
         local successDec, data = pcall(function() return HttpService:JSONDecode(result) end)
 
         if successDec and data then
-            if data.playerESP ~= nil then setPlayerESP(data.playerESP, true) end
+            if data.playerESP ~= nil then 
+                playerESPEnabled = data.playerESP
+                if setPlayerESPUI then setPlayerESPUI(data.playerESP, true) end
+            end
             if data.gearESP ~= nil then setGearESP(data.gearESP, true) end
-            if data.npcESP ~= nil then setNpcESP(data.npcESP, true) end
+            if data.npcESP ~= nil then 
+                npcESPEnabled = data.npcESP
+                if setNpcESPUI then setNpcESPUI(data.npcESP, true) end
+            end
             if data.noGrass ~= nil then setNoGrass(data.noGrass, true) end
             if data.fullbright ~= nil then setFullbright(data.fullbright, true) end
             if data.aimbotMaster ~= nil then setAimbotMasterUI(data.aimbotMaster, true) end
@@ -2291,9 +2491,11 @@ local function loadConfigByName(cfgName)
 end
 
 local function resetToDefault()
-    setPlayerESP(true, true)
+    playerESPEnabled = true
+    npcESPEnabled = true
+    if setPlayerESPUI then setPlayerESPUI(true, true) end
+    if setNpcESPUI then setNpcESPUI(true, true) end
     setGearESP(false, true)
-    setNpcESP(true, true)
     setNoGrass(false, true)
     setFullbright(false, true)
     setAimbotMasterUI(true, true)
@@ -2315,7 +2517,7 @@ saveBtn.BackgroundColor3 = Color3.fromRGB(35, 110, 50)
 saveBtn.TextColor3 = ThemeColors.TextPrimary
 saveBtn.TextSize = 12
 saveBtn.Font = MAIN_FONT
-saveBtn.Text = "SAVE CONFIG"
+saveBtn.Text = "save config"
 saveBtn.Parent = configContainer
 applyCorner(saveBtn, 4)
 table.insert(themeElementsTracker.Texts, saveBtn)
@@ -2328,7 +2530,7 @@ loadBtn.BackgroundColor3 = Color3.fromRGB(110, 35, 35)
 loadBtn.TextColor3 = ThemeColors.TextPrimary
 loadBtn.TextSize = 12
 loadBtn.Font = MAIN_FONT
-loadBtn.Text = "LOAD SELECTED CONFIG"
+loadBtn.Text = "load selected config"
 loadBtn.Parent = configContainer
 applyCorner(loadBtn, 4)
 table.insert(themeElementsTracker.Texts, loadBtn)
@@ -2338,10 +2540,10 @@ loadBtn.MouseButton1Click:Connect(function() loadConfigByName(configNameBox.Text
 local resetBtn = Instance.new("TextButton")
 resetBtn.Size = UDim2.new(1, -8, 0, 28)
 resetBtn.BackgroundColor3 = Color3.fromRGB(110, 75, 35)
-resetBtn.TextColor3 =ThemeColors.TextPrimary
+resetBtn.TextColor3 = ThemeColors.TextPrimary
 resetBtn.TextSize = 12
 resetBtn.Font = MAIN_FONT
-resetBtn.Text = "RESET TO DEFAULT"
+resetBtn.Text = "reset to default"
 resetBtn.Parent = configContainer
 applyCorner(resetBtn, 4)
 table.insert(themeElementsTracker.Texts, resetBtn)
@@ -2354,7 +2556,7 @@ removeAllBtn.BackgroundColor3 = Color3.fromRGB(140, 35, 35)
 removeAllBtn.TextColor3 = ThemeColors.TextPrimary
 removeAllBtn.TextSize = 12
 removeAllBtn.Font = MAIN_FONT
-removeAllBtn.Text = "REMOVE ALL CONFIGS"
+removeAllBtn.Text = "remove all configs"
 removeAllBtn.Parent = configContainer
 applyCorner(removeAllBtn, 4)
 table.insert(themeElementsTracker.Texts, removeAllBtn)
