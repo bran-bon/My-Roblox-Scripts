@@ -1751,6 +1751,7 @@ RunService.RenderStepped:Connect(function()
     local localHRP = character.HumanoidRootPart
     local cam = Workspace.CurrentCamera
     if not cam then return end
+    local screenCenter = Vector2.new(cam.ViewportSize.X / 2, cam.ViewportSize.Y / 2)
 
     for player, drawings in pairs(playerObjects) do
         if not player.Parent then
@@ -1763,8 +1764,11 @@ RunService.RenderStepped:Connect(function()
                 local screenPos, onScreen = cam:WorldToViewportPoint(head.Position)
 
                 if onScreen then
-                    local isAimbotTarget = (AimbotEnabled and currentTarget and currentTarget == player)
-                    local visible = isVisible(head, char)
+                    local distFromCenter = (Vector2.new(screenPos.X, screenPos.Y) - screenCenter).Magnitude
+                    local visible = false
+                    if distFromCenter <= OuterFOVRadius then
+                        visible = isVisible(head, char)
+                    end
                     local espColor = visible and Color3.new(0, 1, 0) or Color3.new(1, 1, 1)
 
                     drawings.Text.Color = espColor
@@ -1814,7 +1818,11 @@ RunService.RenderStepped:Connect(function()
                 local screenPos, onScreen = cam:WorldToViewportPoint(head.Position)
 
                 if onScreen then
-                    local visible = isVisible(head, model)
+                    local distFromCenter = (Vector2.new(screenPos.X, screenPos.Y) - screenCenter).Magnitude
+                    local visible = false
+                    if distFromCenter <= OuterFOVRadius then
+                        visible = isVisible(head, model)
+                    end
                     local espColor = visible and Color3.new(0, 1, 0) or Color3.new(1, 0.5, 0)
 
                     drawings.Text.Color = espColor
