@@ -1275,7 +1275,6 @@ local function isVisible(targetPart, modelOrChar)
     local cf = targetPart.CFrame
     local size = targetPart.Size
     
-    -- Using camera's right vector to find furthermost left and right edge relative to YOUR camera view
     local camRight = cam.CFrame.RightVector
     local leftPoint = cf.Position - (camRight * (size.X / 2))
     local rightPoint = cf.Position + (camRight * (size.X / 2))
@@ -1499,7 +1498,7 @@ SilentCircle.Filled = false
 SilentCircle.Transparency = 1
 SilentCircle.Visible = false
 
-local activeSilentTargetHead = nil
+local activeSilentTargetPos = nil
 local isSilentTargetActive = false
 local isTriggerbotHolding = false
 local triggerbotShotCount = 0
@@ -1564,7 +1563,7 @@ local function getValidHitParts(char)
     return parts
 end
 
-local function getClosestSilentCharacter()
+local function findSilentTargetAndPoint()
     local candidates = {}
     local mousePos = UserInputService:GetMouseLocation()
     local cam = Workspace.CurrentCamera
@@ -1620,16 +1619,9 @@ local function getClosestSilentCharacter()
     for _, candidate in ipairs(candidates) do
         for _, part in ipairs(candidate.parts) do
             if isVisible(part, candidate.char) then
-                return candidate.char, part
+                return candidate.char, part.Position
             end
         end
-    end
-
-    if #candidates > 0 then
-        local candidate = candidates[1]
-        local parts = candidate.parts
-        local hitPart = parts[math.random(1, #parts)]
-        return candidate.char, hitPart
     end
 
     return nil, nil
@@ -1639,7 +1631,8 @@ RunService.RenderStepped:Connect(function()
     if not SilentAimEnabled then
         SilentCircle.Visible = false
         isSilentTargetActive = false
-        activeSilentTargetHead = nil
+        activeSilentTargetPos = nil
+        SilentCircle.Color = Color3.fromRGB(255, 255, 255)
         if isTriggerbotHolding then
             pcall(function() VirtualUser:Button1Up(Vector2.new(0,0)) end)
             isTriggerbotHolding = false
@@ -1652,19 +1645,20 @@ RunService.RenderStepped:Connect(function()
     SilentCircle.Radius = SilentFOVRadius
     SilentCircle.Visible = CircleVisible
 
-    local targetChar, hitPart = getClosestSilentCharacter()
-    if targetChar and hitPart then
+    local targetChar, targetPos = findSilentTargetAndPoint()
+    if targetChar and targetPos then
         if math.random(1, 100) <= SilentHitChance then
-            activeSilentTargetHead = hitPart
+            activeSilentTargetPos = targetPos
             isSilentTargetActive = true
+            SilentCircle.Color = Color3.fromRGB(0, 255, 0)
         else
-            activeSilentTargetHead = nil
+            activeSilentTargetPos = nil
             isSilentTargetActive = false
+            SilentCircle.Color = Color3.fromRGB(255, 255, 255)
         end
 
         if TriggerbotEnabled then
-            local visible = isVisible(hitPart, targetChar)
-            if visible and SilentAimEnabled and isSilentTargetActive and activeSilentTargetHead then
+            if isSilentTargetActive and activeSilentTargetPos then
                 local currentTime = os.clock()
                 local canShoot = true
                 if not rapidFireEnabled then
@@ -1700,8 +1694,9 @@ RunService.RenderStepped:Connect(function()
             end
         end
     else
-        activeSilentTargetHead = nil
+        activeSilentTargetPos = nil
         isSilentTargetActive = false
+        SilentCircle.Color = Color3.fromRGB(255, 255, 255)
         if isTriggerbotHolding then
             pcall(function() VirtualUser:Button1Up(Vector2.new(0,0)) end)
             isTriggerbotHolding = false
@@ -1714,22 +1709,20 @@ local oldNamecall
 oldNamecall = hookmetamethod(game, "__namecall", function(self, ...)
     local method = getnamecallmethod()
     
-    if SilentAimEnabled and isSilentTargetActive then
+    if SilentAimEnabled and isSilentTargetActive and activeSilentTargetPos then
         local args = {...}
         
         if method == "Raycast" and self == Workspace then
             local origin = args[1]
             local direction = args[2]
-            if typeof(origin) == "Vector3" and typeof(direction) == "Vector3" and activeSilentTargetHead then
-                local targetPos = activeSilentTargetHead.Position
-                args[2] = (targetPos - origin).Unit * direction.Magnitude
+            if typeof(origin) == "Vector3" and typeof(direction) == "Vector3" then
+                args[2] = (activeSilentTargetPos - origin).Unit * direction.Magnitude
                 return oldNamecall(self, unpack(args))
             end
         elseif method == "FindPartOnRay" or method == "FindPartOnRayWithIgnoreList" or method == "FindPartOnRayWithWhitelist" then
             local ray = args[1]
-            if typeof(ray) == "Ray" and activeSilentTargetHead then
-                local targetPos = activeSilentTargetHead.Position
-                args[1] = Ray.new(ray.Origin, (targetPos - ray.Origin).Unit * ray.Direction.Magnitude)
+            if typeof(ray) == "Ray" then
+                args[1] = Ray.new(ray.Origin, (activeSilentTargetPos - ray.Origin).Unit * ray.Direction.Magnitude)
                 return oldNamecall(self, unpack(args))
             end
         end
@@ -1741,9 +1734,8 @@ end)
 local oldRaycast
 if Workspace.Raycast then
     oldRaycast = hookfunction(Workspace.Raycast, function(self, origin, direction, ...)
-        if SilentAimEnabled and isSilentTargetActive and activeSilentTargetHead and typeof(origin) == "Vector3" and typeof(direction) == "Vector3" then
-            local targetPos = activeSilentTargetHead.Position
-            direction = (targetPos - origin).Unit * direction.Magnitude
+        if SilentAimEnabled and isSilentTargetActive and activeSilentTargetPos and typeof(origin) == "Vector3" and typeof(direction) == "Vector3" then
+            direction = (activeSilentTargetPos - origin).Unit * direction.Magnitude
         end
         return oldRaycast(self, origin, direction, ...)
     end)
@@ -1766,9 +1758,6 @@ RunService.RenderStepped:Connect(function()
     local localHRP = character.HumanoidRootPart
     local cam = Workspace.CurrentCamera
     if not cam then return end
-    local mousePos = UserInputService:GetMouseLocation()
-
-    local fovGreenTriggered = false
 
     for player, drawings in pairs(playerObjects) do
         if not player.Parent then
@@ -1782,20 +1771,7 @@ RunService.RenderStepped:Connect(function()
 
                 if onScreen then
                     local isAimbotTarget = (AimbotEnabled and currentTarget and currentTarget == player)
-                    local isInsideSilentFOV = false
-                    if SilentAimEnabled then
-                        local distToMouse = (Vector2.new(screenPos.X, screenPos.Y) - mousePos).Magnitude
-                        if distToMouse <= SilentFOVRadius then isInsideSilentFOV = true end
-                    end
-
-                    local visible = false
-                    if isAimbotTarget then
-                        visible = isVisible(head, char)
-                    elseif isInsideSilentFOV and SilentAimEnabled then
-                        visible = isVisible(head, char)
-                        if visible then fovGreenTriggered = true end
-                    end
-
+                    local visible = isVisible(head, char)
                     local espColor = visible and Color3.new(0, 1, 0) or Color3.new(1, 1, 1)
 
                     drawings.Text.Color = espColor
@@ -1845,21 +1821,7 @@ RunService.RenderStepped:Connect(function()
                 local screenPos, onScreen = cam:WorldToViewportPoint(head.Position)
 
                 if onScreen then
-                    local isAimbotTarget = (AimbotEnabled and currentTarget and currentTarget == model)
-                    local isInsideSilentFOV = false
-                    if SilentAimEnabled then
-                        local distToMouse = (Vector2.new(screenPos.X, screenPos.Y) - mousePos).Magnitude
-                        if distToMouse <= SilentFOVRadius then isInsideSilentFOV = true end
-                    end
-
-                    local visible = false
-                    if isAimbotTarget then
-                        visible = isVisible(head, model)
-                    elseif isInsideSilentFOV and SilentAimEnabled then
-                        visible = isVisible(head, model)
-                        if visible then fovGreenTriggered = true end
-                    end
-
+                    local visible = isVisible(head, model)
                     local espColor = visible and Color3.new(0, 1, 0) or Color3.new(1, 0.5, 0)
 
                     drawings.Text.Color = espColor
@@ -1895,14 +1857,6 @@ RunService.RenderStepped:Connect(function()
                 drawings.Text.Visible = false
                 for _, bone in ipairs(drawings.Bones) do bone.line.Visible = false end
             end
-        end
-    end
-
-    if SilentAimEnabled then
-        if fovGreenTriggered or (AimbotEnabled and currentTarget and isVisible(currentTarget:IsA("Player") and currentTarget.Character.Head or currentTarget.Head, currentTarget:IsA("Player") and currentTarget.Character or currentTarget)) then
-            SilentCircle.Color = Color3.fromRGB(0, 255, 0)
-        else
-            SilentCircle.Color = Color3.fromRGB(255, 255, 255)
         end
     end
 end)
