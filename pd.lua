@@ -1459,6 +1459,7 @@ local TriggerbotBurstLimit = 0
 local silentTeamCheckEnabled = true
 
 local SilentFOVRadius = 150
+local OuterFOVRadius = 300
 local SilentHitChance = 100
 
 local TargetHead_S = true
@@ -1564,27 +1565,40 @@ local function getValidHitParts(char)
 end
 
 local function findSilentTargetAndPoint()
-    local candidates = {}
+    local innerCandidates = {}
     local mousePos = UserInputService:GetMouseLocation()
     local cam = Workspace.CurrentCamera
-    if not cam then return nil, nil end
+    if not cam then return nil, nil, false end
+
+    local function evaluateCharacter(char)
+        local hum = char:FindFirstChildOfClass("Humanoid")
+        local parts = getValidHitParts(char)
+        if hum and hum.Health > 0 and #parts > 0 then
+            local head = char:FindFirstChild("Head") or parts[1]
+            local screenPos, onScreen = cam:WorldToViewportPoint(head.Position)
+            if onScreen then
+                local dist = (Vector2.new(screenPos.X, screenPos.Y) - mousePos).Magnitude
+                if dist <= OuterFOVRadius then
+                    local foundVisiblePart = nil
+                    for _, part in ipairs(parts) do
+                        if isVisible(part, char) then
+                            foundVisiblePart = part
+                            break
+                        end
+                    end
+
+                    if foundVisiblePart and dist <= SilentFOVRadius then
+                        table.insert(innerCandidates, {char = char, dist = dist, part = foundVisiblePart})
+                    end
+                end
+            end
+        end
+    end
 
     for _, player in ipairs(Players:GetPlayers()) do
         if player ~= LocalPlayer and player.Character then
             if not isSilentTeammate(player) then
-                local char = player.Character
-                local hum = char:FindFirstChildOfClass("Humanoid")
-                local parts = getValidHitParts(char)
-                if hum and hum.Health > 0 and #parts > 0 then
-                    local head = char:FindFirstChild("Head") or parts[1]
-                    local screenPos, onScreen = cam:WorldToViewportPoint(head.Position)
-                    if onScreen then
-                        local dist = (Vector2.new(screenPos.X, screenPos.Y) - mousePos).Magnitude
-                        if dist <= SilentFOVRadius then
-                            table.insert(candidates, {char = char, dist = dist, parts = parts})
-                        end
-                    end
-                end
+                evaluateCharacter(player.Character)
             end
         end
     end
@@ -1594,19 +1608,9 @@ local function findSilentTargetAndPoint()
         if aiZonesFolder then
             for _, zoneFolder in ipairs(aiZonesFolder:GetChildren()) do
                 for _, npc in ipairs(zoneFolder:GetChildren()) do
-                    if npc:IsA("Model") and npc:FindFirstChild("Humanoid") and npc.Humanoid.Health > 0 then
+                    if npc:IsA("Model") then
                         if not isSilentTeammate(npc) then
-                            local parts = getValidHitParts(npc)
-                            if #parts > 0 then
-                                local head = npc:FindFirstChild("Head") or parts[1]
-                                local screenPos, onScreen = cam:WorldToViewportPoint(head.Position)
-                                if onScreen then
-                                    local dist = (Vector2.new(screenPos.X, screenPos.Y) - mousePos).Magnitude
-                                    if dist <= SilentFOVRadius then
-                                        table.insert(candidates, {char = npc, dist = dist, parts = parts})
-                                    end
-                                end
-                            end
+                            evaluateCharacter(npc)
                         end
                     end
                 end
@@ -1614,17 +1618,13 @@ local function findSilentTargetAndPoint()
         end
     end
 
-    table.sort(candidates, function(a, b) return a.dist < b.dist end)
+    table.sort(innerCandidates, function(a, b) return a.dist < b.dist end)
 
-    for _, candidate in ipairs(candidates) do
-        for _, part in ipairs(candidate.parts) do
-            if isVisible(part, candidate.char) then
-                return candidate.char, part.Position
-            end
-        end
+    if #innerCandidates > 0 then
+        return innerCandidates[1].char, innerCandidates[1].part.Position, true
     end
 
-    return nil, nil
+    return nil, nil, false
 end
 
 RunService.RenderStepped:Connect(function()
@@ -1645,8 +1645,9 @@ RunService.RenderStepped:Connect(function()
     SilentCircle.Radius = SilentFOVRadius
     SilentCircle.Visible = CircleVisible
 
-    local targetChar, targetPos = findSilentTargetAndPoint()
-    if targetChar and targetPos then
+    local targetChar, targetPos, isVisibleInInnerRing = findSilentTargetAndPoint()
+    
+    if targetChar and targetPos and isVisibleInInnerRing then
         if math.random(1, 100) <= SilentHitChance then
             activeSilentTargetPos = targetPos
             isSilentTargetActive = true
@@ -1658,39 +1659,31 @@ RunService.RenderStepped:Connect(function()
         end
 
         if TriggerbotEnabled then
-            if isSilentTargetActive and activeSilentTargetPos then
-                local currentTime = os.clock()
-                local canShoot = true
-                if not rapidFireEnabled then
-                    if currentTime - lastTriggerbotTime < 0.25 then canShoot = false end
+            local currentTime = os.clock()
+            local canShoot = true
+            if not rapidFireEnabled then
+                if currentTime - lastTriggerbotTime < 0.25 then canShoot = false end
+            end
+
+            if canShoot then
+                if TriggerbotBurstLimit > 0 and rapidFireEnabled then
+                    triggerbotShotCount = triggerbotShotCount + 1
+                    if triggerbotShotCount > TriggerbotBurstLimit then
+                        if isTriggerbotHolding then
+                            pcall(function() VirtualUser:Button1Up(Vector2.new(0,0)) end)
+                            isTriggerbotHolding = false
+                        end
+                        canShoot = false
+                    end
                 end
 
                 if canShoot then
-                    if TriggerbotBurstLimit > 0 and rapidFireEnabled then
-                        triggerbotShotCount = triggerbotShotCount + 1
-                        if triggerbotShotCount > TriggerbotBurstLimit then
-                            if isTriggerbotHolding then
-                                pcall(function() VirtualUser:Button1Up(Vector2.new(0,0)) end)
-                                isTriggerbotHolding = false
-                            end
-                            canShoot = false
-                        end
-                    end
-
-                    if canShoot then
-                        if not isTriggerbotHolding then
-                            pcall(function() VirtualUser:Button1Down(Vector2.new(0,0)) end)
-                            isTriggerbotHolding = true
-                            lastTriggerbotTime = currentTime
-                        end
+                    if not isTriggerbotHolding then
+                        pcall(function() VirtualUser:Button1Down(Vector2.new(0,0)) end)
+                        isTriggerbotHolding = true
+                        lastTriggerbotTime = currentTime
                     end
                 end
-            else
-                if isTriggerbotHolding then
-                    pcall(function() VirtualUser:Button1Up(Vector2.new(0,0)) end)
-                    isTriggerbotHolding = false
-                end
-                triggerbotShotCount = 0
             end
         end
     else
@@ -2270,6 +2263,11 @@ do
         checkAndClearBlatant()
     end)
 
+    createSliderUI(silentContainer, "outer fov radius", 50, 600, 10, OuterFOVRadius, function(val)
+        OuterFOVRadius = val
+        checkAndClearBlatant()
+    end)
+
     _, setHitChanceUI = createSliderUI(silentContainer, "hit chance", 10, 100, 5, SilentHitChance, function(val)
         SilentHitChance = val
         checkAndClearBlatant()
@@ -2421,6 +2419,7 @@ local function saveCurrentConfig()
         triggerbot = TriggerbotEnabled,
         burstLimit = TriggerbotBurstLimit,
         silentFOV = SilentFOVRadius,
+        outerFOV = OuterFOVRadius,
         silentHitChance = SilentHitChance
     }
 
