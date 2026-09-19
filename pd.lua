@@ -1220,12 +1220,11 @@ if aiZones then
     end)
 end
 
-local function isVisible(targetPart, modelOrChar)
+local function isPointVisible(destination, modelOrChar)
     local cam = Workspace.CurrentCamera
     if not cam then return false end
     
     local origin = cam.CFrame.Position
-    local destination = targetPart.Position
     
     local raycastParams = RaycastParams.new()
     raycastParams.FilterType = Enum.RaycastFilterType.Exclude
@@ -1263,6 +1262,28 @@ local function isVisible(targetPart, modelOrChar)
             return true
         end
     end
+    
+    return false
+end
+
+local function isVisible(targetPart, modelOrChar)
+    if not targetPart then return false end
+    
+    local cam = Workspace.CurrentCamera
+    if not cam then return false end
+
+    local cf = targetPart.CFrame
+    local size = targetPart.Size
+    
+    -- Using camera's right vector to find furthermost left and right edge relative to YOUR camera view
+    local camRight = cam.CFrame.RightVector
+    local leftPoint = cf.Position - (camRight * (size.X / 2))
+    local rightPoint = cf.Position + (camRight * (size.X / 2))
+    local topPoint = cf.Position + (cf.UpVector * (size.Y / 2))
+    
+    if isPointVisible(topPoint, modelOrChar) then return true end
+    if isPointVisible(leftPoint, modelOrChar) then return true end
+    if isPointVisible(rightPoint, modelOrChar) then return true end
     
     return false
 end
@@ -1974,7 +1995,7 @@ do
 
     createButtonUI(visualsContainer, "enable third person", function()
         LocalPlayer.CameraMode = Enum.CameraMode.Classic
-        LocalPlayer.CameraMaxZoomDistance = 400
+        LocalPlayer.CameraMaxZoomDistance = 9999
         LocalPlayer.CameraMinZoomDistance = 0.5
     end)
 
@@ -2525,7 +2546,7 @@ table.insert(themeElementsTracker.Texts, saveBtn)
 
 saveBtn.MouseButton1Click:Connect(function() saveCurrentConfig() end)
 
-local loadBtn = Instance.new("TextButton")
+loadBtn = Instance.new("TextButton")
 loadBtn.Size = UDim2.new(1, -8, 0, 28)
 loadBtn.BackgroundColor3 = Color3.fromRGB(110, 35, 35)
 loadBtn.TextColor3 = ThemeColors.TextPrimary
