@@ -573,7 +573,8 @@ end
 
 local invWindow = Instance.new("Frame")
 invWindow.Size = UDim2.new(0, 680, 0, 480)
-invWindow.Position = UDim2.new(0.5, -340, 0.5, -240)
+invWindow.AnchorPoint = Vector2.new(1, 1)
+invWindow.Position = UDim2.new(1, -10, 1, -10)
 invWindow.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 invWindow.BorderSizePixel = 0
 invWindow.Visible = false
@@ -600,6 +601,7 @@ invTitle.Parent = invTopBar
 
 local invDragging, invDragInput, invDragStart, invStartPos
 invTopBar.InputBegan:Connect(function(input)
+    if not inventoryViewerEnabled then return end
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
         invDragging = true
         invDragStart = input.Position
@@ -1031,15 +1033,33 @@ local _, setInvViewerUI = createToggleUI(inventoryTabContainer, "Inventory Viewe
     end
 end)
 
-local aimbotInvViewerEnabled = false
-local aimbotInvKey = Enum.KeyCode.H
+local silentAimInvViewerEnabled = false
+local silentAimInvKey = Enum.KeyCode.H
 
-local _, setAimbotInvViewerUI = createToggleUI(inventoryTabContainer, "Aimbot Inv Viewer", false, function(val)
-    aimbotInvViewerEnabled = val
+createToggleUI(inventoryTabContainer, "Silent Aim Inv Viewer", false, function(val)
+    silentAimInvViewerEnabled = val
+    inventoryLoopToken = inventoryLoopToken + 1
+    local currentToken = inventoryLoopToken
+
+    if val then
+        refreshInventoryDisplay()
+        task.spawn(function()
+            while silentAimInvViewerEnabled and currentToken == inventoryLoopToken do
+                task.wait(5)
+                if silentAimInvViewerEnabled and currentToken == inventoryLoopToken then
+                    refreshInventoryDisplay()
+                end
+            end
+        end)
+    else
+        if not inventoryViewerEnabled then
+            invWindow.Visible = false
+        end
+    end
 end)
 
-createKeybindUI(inventoryTabContainer, "Aimbot Inv Key", aimbotInvKey, function(key)
-    aimbotInvKey = key
+createKeybindUI(inventoryTabContainer, "Silent Aim Inv Key", silentAimInvKey, function(key)
+    silentAimInvKey = key
 end)
 
 local playerESPEnabled = true
@@ -1505,13 +1525,22 @@ local isTriggerbotHolding = false
 local triggerbotShotCount = 0
 local lastTriggerbotTime = 0
 
+local permanentTeamCache = {}
+
 local function isSilentTeammate(target)
     if not silentTeamCheckEnabled then return false end
     local targetName = getPlayerNameFromTarget(target)
     if not targetName then return false end
 
+    if permanentTeamCache[targetName] ~= nil then
+        return permanentTeamCache[targetName]
+    end
+
     local clansFolder = ReplicatedStorage:FindFirstChild("Clans")
-    if not clansFolder then return false end
+    if not clansFolder then 
+        permanentTeamCache[targetName] = false
+        return false 
+    end
 
     local localPlayerName = LocalPlayer.Name
     local localTeamFolder = nil
@@ -1528,8 +1557,9 @@ local function isSilentTeammate(target)
         end
     end
 
-    if localTeamFolder and targetTeamFolder and localTeamFolder == targetTeamFolder then return true end
-    return false
+    local isTeam = (localTeamFolder and targetTeamFolder and localTeamFolder == targetTeamFolder)
+    permanentTeamCache[targetName] = isTeam
+    return isTeam
 end
 
 local function getValidHitParts(char)
@@ -1565,12 +1595,14 @@ local function getValidHitParts(char)
 end
 
 local function findSilentTargetAndPoint()
-    local innerCandidates = {}
     local mousePos = UserInputService:GetMouseLocation()
     local cam = Workspace.CurrentCamera
-    if not cam then return nil, nil, false end
+    if not cam then return nil, nil, false, nil end
 
-    local function evaluateCharacter(char)
+    local closestCandidate = nil
+    local shortestDist = OuterFOVRadius + 1
+
+    local function evaluateCharacter(char, playerObj)
         local hum = char:FindFirstChildOfClass("Humanoid")
         local parts = getValidHitParts(char)
         if hum and hum.Health > 0 and #parts > 0 then
@@ -1578,18 +1610,9 @@ local function findSilentTargetAndPoint()
             local screenPos, onScreen = cam:WorldToViewportPoint(head.Position)
             if onScreen then
                 local dist = (Vector2.new(screenPos.X, screenPos.Y) - mousePos).Magnitude
-                if dist <= OuterFOVRadius then
-                    local foundVisiblePart = nil
-                    for _, part in ipairs(parts) do
-                        if isVisible(part, char) then
-                            foundVisiblePart = part
-                            break
-                        end
-                    end
-
-                    if foundVisiblePart and dist <= SilentFOVRadius then
-                        table.insert(innerCandidates, {char = char, dist = dist, part = foundVisiblePart})
-                    end
+                if dist < shortestDist then
+                    shortestDist = dist
+                    closestCandidate = {char = char, dist = dist, parts = parts, player = playerObj}
                 end
             end
         end
@@ -1598,7 +1621,7 @@ local function findSilentTargetAndPoint()
     for _, player in ipairs(Players:GetPlayers()) do
         if player ~= LocalPlayer and player.Character then
             if not isSilentTeammate(player) then
-                evaluateCharacter(player.Character)
+                evaluateCharacter(player.Character, player)
             end
         end
     end
@@ -1610,7 +1633,7 @@ local function findSilentTargetAndPoint()
                 for _, npc in ipairs(zoneFolder:GetChildren()) do
                     if npc:IsA("Model") then
                         if not isSilentTeammate(npc) then
-                            evaluateCharacter(npc)
+                            evaluateCharacter(npc, nil)
                         end
                     end
                 end
@@ -1618,14 +1641,25 @@ local function findSilentTargetAndPoint()
         end
     end
 
-    table.sort(innerCandidates, function(a, b) return a.dist < b.dist end)
+    if closestCandidate and closestCandidate.dist <= OuterFOVRadius then
+        local foundVisiblePart = nil
+        for _, part in ipairs(closestCandidate.parts) do
+            if isVisible(part, closestCandidate.char) then
+                foundVisiblePart = part
+                break
+            end
+        end
 
-    if #innerCandidates > 0 then
-        return innerCandidates[1].char, innerCandidates[1].part.Position, true
+        local isInsideInner = (foundVisiblePart and closestCandidate.dist <= SilentFOVRadius)
+        local targetPos = foundVisiblePart and foundVisiblePart.Position or closestCandidate.char:FindFirstChild("Head") and closestCandidate.char.Head.Position or nil
+        return closestCandidate.char, targetPos, isInsideInner, closestCandidate.player
     end
 
-    return nil, nil, false
+    return nil, nil, false, nil
 end
+
+local throttleCounter = 0
+local cachedTargetChar, cachedTargetPos, cachedIsVisible, cachedTargetPlayer = nil, nil, false, nil
 
 RunService.RenderStepped:Connect(function()
     if not SilentAimEnabled then
@@ -1645,7 +1679,20 @@ RunService.RenderStepped:Connect(function()
     SilentCircle.Radius = SilentFOVRadius
     SilentCircle.Visible = CircleVisible
 
-    local targetChar, targetPos, isVisibleInInnerRing = findSilentTargetAndPoint()
+    throttleCounter = throttleCounter + 1
+    if throttleCounter >= 3 then
+        throttleCounter = 0
+        cachedTargetChar, cachedTargetPos, cachedIsVisible, cachedTargetPlayer = findSilentTargetAndPoint()
+    end
+
+    local targetChar, targetPos, isVisibleInInnerRing, targetPlayer = cachedTargetChar, cachedTargetPos, cachedIsVisible, cachedTargetPlayer
+
+    if silentAimInvViewerEnabled and invWindow.Visible and targetPlayer then
+        if selectedTargetPlayer ~= targetPlayer.Name then
+            selectedTargetPlayer = targetPlayer.Name
+            refreshInventoryDisplay()
+        end
+    end
     
     if targetChar and targetPos and isVisibleInInnerRing then
         if math.random(1, 100) <= SilentHitChance then
@@ -2090,10 +2137,12 @@ UserInputService.InputBegan:Connect(function(input, gameProcessedEvent)
         return
     end
 
-    if input.KeyCode == aimbotInvKey then
-        if aimbotInvViewerEnabled and currentTarget and currentTarget:IsA("Player") then
-            selectedTargetPlayer = currentTarget.Name
-            setInvViewerUI(not inventoryViewerEnabled, true)
+    if input.KeyCode == silentAimInvKey then
+        if silentAimInvViewerEnabled then
+            invWindow.Visible = not invWindow.Visible
+            if invWindow.Visible then
+                refreshInventoryDisplay()
+            end
         end
         return
     end
@@ -2507,7 +2556,7 @@ table.insert(themeElementsTracker.Texts, saveBtn)
 
 saveBtn.MouseButton1Click:Connect(function() saveCurrentConfig() end)
 
-loadBtn = Instance.new("TextButton")
+local loadBtn = Instance.new("TextButton")
 loadBtn.Size = UDim2.new(1, -8, 0, 28)
 loadBtn.BackgroundColor3 = Color3.fromRGB(110, 35, 35)
 loadBtn.TextColor3 = ThemeColors.TextPrimary
